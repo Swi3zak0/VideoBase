@@ -12,10 +12,34 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from datetime import timedelta
 from pathlib import Path
+import os
+import firebase_admin
+from firebase_admin import credentials
+from firebase_admin import storage
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+
+firebase_config_path = os.path.join(BASE_DIR, 'firebase', 'secrets.json')
+FIREBASE_STORAGE_BUCKET_NAME = 'videobase-49d63.appspot.com'
+firebase_cred = credentials.Certificate(firebase_config_path)
+firebase_admin.initialize_app(firebase_cred, {
+    'storageBucket': FIREBASE_STORAGE_BUCKET_NAME
+})
+
+bucket = storage.bucket()
+
+FIREBASE_CONFIG = {
+    'apiKey': 'AIzaSyB9wB2fMvbxEJ34OD2_56pbdv1gtje16h0',
+    'authDomain': 'videobase-49d63.firebaseapp.com',
+    'projectId': 'videobase-49d63',
+    'storageBucket': 'videobase-49d63.appspot.com',
+    'messagingSenderId': '153125374697',
+    'appId': '1:153125374697:web:caecd45a90a6aabdcbbe78',
+    'measurementId': 'G-DBVSYEYVDF'
+}
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/

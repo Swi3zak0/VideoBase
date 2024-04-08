@@ -72,3 +72,8 @@ class VerifyGraphQLView(GraphQLView):
                 raise GraphQLError(
                     'Nieprawidłowy token lub użytkownik nie istnieje.')
         return super().dispatch(request, *args, **kwargs)
+
+
+from django.conf import settings
+
+firebase_config = settings.FIREBASE_CONFIG

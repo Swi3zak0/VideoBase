@@ -22,7 +22,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = []
 
-    def str(self):
+    def __str__(self):
         return f"{self.username}"
 
 
@@ -30,7 +30,7 @@ class Video(models.Model):
     name = models.CharField(max_length=255, null=False)
     url = models.CharField(max_length=255, null=False)
 
-    def str(self):
+    def __str__(self):
         return f"{self.name}"
     
 

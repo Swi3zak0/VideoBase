@@ -20,7 +20,7 @@ class CreateVideoMutation(graphene.Mutation):
         try:
             bucket = storage.bucket()
             blob = bucket.blob(f"videos/{video.name}.{random.random()}")
-            blob.upload_from_file(video, content_type=video.content_type)
+            blob.upload_from_string(video.read(), content_type=video.content_type)
             blob.make_public()
 
             video_obj = Video.objects.create(url=blob.public_url, name=video.name)

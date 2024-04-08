@@ -4,6 +4,7 @@
 backdjango/VideoBase/db.sqlite3
 backdjango/VideoBase/db.sqlite3
 backdjango/VideoBase/*.pyc
+backdjango/VideoBase/app/*.pyc
 *.pyc
 *.sqlite3
 *.pyc
