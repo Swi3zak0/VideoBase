@@ -12,6 +12,7 @@ import Activated from "./Components/Activated";
 import NewPassword from "./Components/NewPassword";
 import ResetPassword from "./Components/ResetPassword";
 import AddVideo from "./Components/AddVideo";
+import CheckToken from "./Components/CheckToken";
 
 const client = new ApolloClient({
   uri: "http://localhost:8000/graphql",
@@ -19,10 +20,10 @@ const client = new ApolloClient({
   cache: new InMemoryCache(),
 });
 
-
 function App() {
   return (
     <ApolloProvider client={client}>
+      <CheckToken />
       <Router>
         <TopNav />
         <Routes>
