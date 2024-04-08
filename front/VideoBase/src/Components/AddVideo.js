@@ -1,14 +1,52 @@
 import { Button, Form } from "react-bootstrap";
 import "../CSS/Styles.css";
 import { useNavigate } from "react-router-dom";
+import { useMutation, gql } from "@apollo/client";
+import { useState } from "react";
+
+const ADD_VIDEO_MUTATION = gql`
+  mutation addVideoMutation($video: Upload!) {
+    createVideo(video: $video) {
+      error
+      success
+      video {
+        name
+        url
+      }
+    }
+  }
+`;
 
 function AddVideo() {
   const filename = localStorage.getItem("fileName");
   const navigate = useNavigate();
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [fileStatus, setFileStatus] = useState("");
+
+  const [upload] = useMutation(ADD_VIDEO_MUTATION, {
+    onCompleted: (data) => {
+      if (data.createVideo.success) {
+        navigate("/home");
+      } else {
+        setFileStatus("Błąd dodawania filmu!");
+      }
+    },
+  });
+
+  const handleFileChange = (event) => {
+    setSelectedFile(event.target.file[0]);
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    await upload({
+      variables: { video: selectedFile },
+    });
+  };
 
   return (
     <div className="standard-form">
-      <Form>
+      <Form onSubmit={handleSubmit}>
         <h1>
           <Button
             className="button"
@@ -22,6 +60,7 @@ function AddVideo() {
 
         <Form.Group className="mb-3">
           <Form.Label>{filename}</Form.Label>
+          <Form.Control type="file" onChange={handleFileChange} />
         </Form.Group>
 
         <Form.Group className="mb-3">
@@ -57,6 +96,7 @@ function AddVideo() {
         <Button className="button" variant="dark" type="submit">
           Add
         </Button>
+        {fileStatus && <p className="danger">{fileStatus}</p>}
       </Form>
     </div>
   );
