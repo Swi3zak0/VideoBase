@@ -1,0 +1,10 @@
+.no-padding {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.links {
+  color: black;
+  font-weight: bold;
+  text-decoration: none;
+}

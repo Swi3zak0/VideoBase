@@ -1,0 +1,24 @@
+.navbar {
+  background-color: #3d3d3d;
+  color: #fff;
+  height: 60px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+}
+
+.nav-links,
+.navbar-brand-custom {
+  font-weight: bold;
+  font-size: large;
+}
+
+.navbar-brand-custom {
+  font-size: x-large;
+  color: #fff;
+}
+
+.navbar-brand-custom:hover {
+  color: #fff;
+}

@@ -1,0 +1,16 @@
+FROM python:3.12.2
+
+WORKDIR /VideoBase
+
+RUN pip install django
+RUN pip install django-graphql-jwt
+RUN pip install graphene
+RUN pip install graphene_django
+RUN pip install jinja2
+RUN pip install django-cors-headers
+
+COPY . .
+
+ENV DJANGO_SETTINGS_MODULE=VideoBase.settings
+
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]

@@ -1,0 +1,17 @@
+services:
+  backend:
+    build: ./backdjango/VideoBase
+    volumes:
+      - ./backdjango/VideoBase:/app
+      - /app/__pycache__
+    ports:
+      - "8000:8000"
+  frontend:
+    build: ./front/react-app
+    volumes:
+      - ./front/react-app/src:/react-app/src
+      - ./front/react-app/public:/react-app/public
+    ports:
+      - "3000:3000"
+    environment:
+      - HOST=0.0.0.0
