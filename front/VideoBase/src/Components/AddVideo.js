@@ -4,49 +4,19 @@ import { useNavigate } from "react-router-dom";
 import { useMutation, gql } from "@apollo/client";
 import { useState } from "react";
 
-const ADD_VIDEO_MUTATION = gql`
-  mutation addVideoMutation($video: Upload!) {
-    createVideo(video: $video) {
-      error
-      success
-      video {
-        name
-        url
-      }
-    }
-  }
-`;
-
 function AddVideo() {
   const filename = localStorage.getItem("fileName");
   const navigate = useNavigate();
   const [selectedFile, setSelectedFile] = useState(null);
   const [fileStatus, setFileStatus] = useState("");
 
-  const [upload] = useMutation(ADD_VIDEO_MUTATION, {
-    onCompleted: (data) => {
-      if (data.createVideo.success) {
-        navigate("/home");
-      } else {
-        setFileStatus("Błąd dodawania filmu!");
-      }
-    },
-  });
-
   const handleFileChange = (event) => {
     setSelectedFile(event.target.file[0]);
   };
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-    await upload({
-      variables: { video: selectedFile },
-    });
-  };
-
   return (
     <div className="standard-form">
-      <Form onSubmit={handleSubmit}>
+      <Form>
         <h1>
           <Button
             className="button"
