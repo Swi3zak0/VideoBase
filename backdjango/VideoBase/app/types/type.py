@@ -1,6 +1,7 @@
 from graphene_django import DjangoObjectType
 from app.models import CustomUser, Video, Post
 
+
 class UsersType(DjangoObjectType):
     class Meta:
         model = CustomUser

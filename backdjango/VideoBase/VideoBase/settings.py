@@ -14,8 +14,7 @@ from datetime import timedelta
 from pathlib import Path
 import os
 import firebase_admin
-from firebase_admin import credentials
-from firebase_admin import storage
+from firebase_admin import credentials, storage
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -67,6 +66,7 @@ INSTALLED_APPS = [
     'corsheaders',
     'app',
     'graphene_django',
+    'rest_framework'
 
 ]
 

@@ -1,6 +1,8 @@
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.db import models
 from .menagers import UserManager
+from firebase_admin import storage
+from django.db import models
 
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
@@ -27,12 +29,13 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
 
 class Video(models.Model):
-    name = models.CharField(max_length=255, null=False)
-    url = models.CharField(max_length=255, null=False)
+    title = models.CharField(max_length=100)
+    video_file = models.FileField(upload_to='videos/')
+    url = models.URLField(blank=True)
 
     def __str__(self):
-        return f"{self.name}"
-    
+        return self.title
+
 
 class Post(models.Model):
     title = models.CharField(max_length=25, null=False)

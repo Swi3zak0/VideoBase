@@ -11,6 +11,13 @@ from .models import CustomUser
 import jwt
 from graphene_django.views import GraphQLView
 from graphql import GraphQLError
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .forms import VideoUploadForm
+from VideoBase.settings import FIREBASE_STORAGE_BUCKET_NAME
+from .models import Video
+from firebase_admin import storage
 
 # Create your views here.
 
@@ -74,6 +81,28 @@ class VerifyGraphQLView(GraphQLView):
         return super().dispatch(request, *args, **kwargs)
 
 
-from django.conf import settings
+class VideoUploadAPIView(APIView):
+    def post(self, request, *args, **kwargs):
+        form = VideoUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            video_file = request.FILES['video_file']
+            video_name = video_file.name
+            video_bytes = video_file.read()
 
-firebase_config = settings.FIREBASE_CONFIG
+            try:
+                bucket_name = FIREBASE_STORAGE_BUCKET_NAME
+                bucket = storage.bucket(bucket_name)
+                blob = bucket.blob(f'videos/{video_name}')
+                blob.upload_from_string(video_bytes, content_type='video/mp4')
+
+                video_url = blob.public_url
+
+                video = Video(title=video_name, url=video_url)
+                video.save()
+
+                return Response({'url': video_url}, status=status.HTTP_201_CREATED)
+            except Exception as e:
+                error_message = f"An error occurred while uploading the video: {str(e)}"
+                return Response({'error': error_message}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        else:
+            return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)

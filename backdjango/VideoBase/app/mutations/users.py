@@ -1,3 +1,4 @@
+import hashlib
 from django.forms import ValidationError
 import graphene
 import jwt
@@ -82,8 +83,6 @@ class LoginUser(graphene.Mutation):
             return ValidationError("Nie ma takiego użytkownika")
 
 
-import hashlib
-
 class RequestPasswordReset(graphene.Mutation):
     success = graphene.Boolean()
 
@@ -134,7 +133,8 @@ class ResetPassword(graphene.Mutation):
             user = CustomUser.objects.get(pk=uid)
 
             if user is not None:
-                hashed_reset_code = hashlib.sha256(reset_code.encode()).hexdigest()
+                hashed_reset_code = hashlib.sha256(
+                    reset_code.encode()).hexdigest()
 
                 if not constant_time_compare(user.reset_code, hashed_reset_code):
                     raise ValidationError(
@@ -157,7 +157,6 @@ class ResetPassword(graphene.Mutation):
                 'Nieprawidłowy identyfikator użytkownika lub kod resetowania hasła.')
 
 
-
 class ChangePasswordMutation(graphene.Mutation):
     success = graphene.Boolean()
 
@@ -165,7 +164,6 @@ class ChangePasswordMutation(graphene.Mutation):
         old_password = graphene.String(required=True)
         new_password = graphene.String(required=True)
         new_password_repeat = graphene.String(required=True)
-
 
     def mutate(self, info, old_password, new_password, new_password_repeat):
         jwt_token = info.context.COOKIES.get('JWT')
