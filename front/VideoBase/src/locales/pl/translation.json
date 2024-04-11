@@ -55,5 +55,6 @@
   "uploadVideo": "Prześlij wideo",
   "username": "Nazwa użytkownika",
   "videoInfo": "Informacje o wideo",
-  "welcome": "Witamy w naszej aplikacji!"
+  "welcome": "Witamy w naszej aplikacji!",
+  "loading": "Ładowanie..."
 }

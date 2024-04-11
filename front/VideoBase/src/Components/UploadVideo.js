@@ -1,39 +1,20 @@
 import React, { useState, useRef } from "react";
 import { Button, Card, Form } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import axios from "axios";
-
-// const ADD_VIDEO_MUTATION = gql`
-//   mutation Mutation($video: Upload!) {
-//     createVideo(video: $video) {
-//       video
-//       success
-//       error
-//     }
-//   }
-// `;
 
 function UploadVideo() {
   const [file, setFile] = useState(null);
   const inputRef = useRef(null);
   const { t } = useTranslation();
-  const [fileStatus, setFileStatus] = useState("");
-
-  // const [upload] = useMutation(ADD_VIDEO_MUTATION, {
-  //   onCompleted: (data) => {
-  //     if (data.createVideo.success) {
-  //       setFileStatus("success");
-  //     } else {
-  //       setFileStatus("Błąd dodawania filmu!");
-  //     }
-  //   },
-  //   onError: (error) => {
-  //     console.error("Mutacja GraphQL zwróciła błąd: ", error);
-  //   },
-  // });
+  const navigate = useNavigate();
+  const [uploadStatus, setUploadStatus] = useState();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setIsLoading(true);
     const formData = new FormData();
     formData.append("video_file", file);
 
@@ -47,8 +28,9 @@ function UploadVideo() {
           },
         }
       );
+      navigate("/addVideo");
     } catch (error) {
-      console.error("Error:", error);
+      setUploadStatus("Bład wgrywania video");
     }
   };
 
@@ -108,9 +90,9 @@ function UploadVideo() {
           className="button"
           variant="dark"
           type="submit"
-          disabled={!file}
+          disabled={!file || isLoading}
         >
-          {t("upload")}
+          {isLoading ? t("loading") : t("upload")}
         </Button>
         {file && <Form.Control plaintext readOnly defaultValue={file.name} />}
         <Button
@@ -120,7 +102,7 @@ function UploadVideo() {
         >
           {t("removeFile")}
         </Button>
-        {fileStatus && <p>{fileStatus}</p>}
+        {uploadStatus && <p>{uploadStatus}</p>}
       </Form>
     </div>
   );

@@ -55,5 +55,6 @@
   "uploadVideo": "Upload Video",
   "username": "Username",
   "videoInfo": "Video Info",
-  "welcome": "Welcome to our application!"
+  "welcome": "Welcome to our application!",
+  "loading": "Loading..."
 }

@@ -13,16 +13,13 @@ import NewPassword from "./Components/NewPassword";
 import ResetPassword from "./Components/ResetPassword";
 import AddVideo from "./Components/AddVideo";
 import CheckToken from "./Components/CheckToken";
-import "./firebase";
-import createUploadLink from "apollo-upload-client/createUploadLink.mjs";
 
 const client = new ApolloClient({
   cache: new InMemoryCache(),
-  link: createUploadLink({
-    uri: "http://localhost:8000/graphql",
-    credentials: "include",
-  }),
+  uri: "http://localhost:8000/graphql",
+  credentials: "include",
 });
+
 function App() {
   return (
     <ApolloProvider client={client}>
