@@ -87,13 +87,13 @@ class VideoUploadAPIView(APIView):
         if form.is_valid():
             video_file = request.FILES['video_file']
             video_name = video_file.name
-            video_bytes = video_file.read()
 
             try:
                 bucket_name = FIREBASE_STORAGE_BUCKET_NAME
                 bucket = storage.bucket(bucket_name)
                 blob = bucket.blob(f'videos/{video_name}')
-                blob.upload_from_string(video_bytes, content_type='video/mp4')
+                
+                blob.upload_from_file(video_file, content_type='video/mp4', predefined_acl='publicRead')
 
                 video_url = blob.public_url
 

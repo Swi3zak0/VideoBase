@@ -2,17 +2,23 @@ from django.forms import ValidationError
 import graphene
 import graphql_jwt
 from graphql_jwt.shortcuts import get_token, create_refresh_token, get_refresh_token
-from .models import CustomUser
+from .models import CustomUser, Video
 from django.http import HttpResponse
 from .mutations.users import RegisterUser, LoginUser, RequestPasswordReset, ResetPassword, ChangePasswordMutation, UsersType
+from .types.type import VideoType
 from graphql_jwt.decorators import login_required
+from .models import Video as VideoModel
 # from .mutations.videos import CreateVideoMutation
 # , UpdateVideoMutation, DeleteVideoMutation
-
 
 class Query(graphene.ObjectType):
     all_users = graphene.List(UsersType)
     check_token = graphene.Boolean()
+    all_videos = graphene.List(VideoType)
+
+    @login_required
+    def resolve_all_videos(self, info):
+        return VideoModel.objects.all()
 
     @login_required
     def resolve_all_users(root, info):
@@ -21,6 +27,7 @@ class Query(graphene.ObjectType):
     @login_required
     def resolve_check_token(self, info):
         return True
+    
 
 
 class Mutation(graphene.ObjectType):

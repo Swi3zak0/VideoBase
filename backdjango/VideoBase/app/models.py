@@ -30,7 +30,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
 class Video(models.Model):
     title = models.CharField(max_length=100)
-    video_file = models.FileField(upload_to='videos/')
+    video_file = models.FileField()
     url = models.URLField(blank=True)
 
     def __str__(self):
