@@ -1,17 +1,17 @@
 import React, { useState, useRef } from "react";
 import { Button, Card, Form } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
-import { useMutation, gql } from "@apollo/client";
+import axios from "axios";
 
-const ADD_VIDEO_MUTATION = gql`
-  mutation Mutation($video: Upload!) {
-    createVideo(video: $video) {
-      video
-      success
-      error
-    }
-  }
-`;
+// const ADD_VIDEO_MUTATION = gql`
+//   mutation Mutation($video: Upload!) {
+//     createVideo(video: $video) {
+//       video
+//       success
+//       error
+//     }
+//   }
+// `;
 
 function UploadVideo() {
   const [file, setFile] = useState(null);
@@ -19,31 +19,41 @@ function UploadVideo() {
   const { t } = useTranslation();
   const [fileStatus, setFileStatus] = useState("");
 
-  const [upload] = useMutation(ADD_VIDEO_MUTATION, {
-    onCompleted: (data) => {
-      if (data.createVideo.success) {
-        setFileStatus("success");
-      } else {
-        setFileStatus("Błąd dodawania filmu!");
-      }
-    },
-    onError: (error) => {
-      console.error("Mutacja GraphQL zwróciła błąd: ", error);
-    },
-  });
-
-  const handleDragOver = (event) => {
-    event.preventDefault();
-  };
+  // const [upload] = useMutation(ADD_VIDEO_MUTATION, {
+  //   onCompleted: (data) => {
+  //     if (data.createVideo.success) {
+  //       setFileStatus("success");
+  //     } else {
+  //       setFileStatus("Błąd dodawania filmu!");
+  //     }
+  //   },
+  //   onError: (error) => {
+  //     console.error("Mutacja GraphQL zwróciła błąd: ", error);
+  //   },
+  // });
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log(file);
-    if (file) {
-      await upload({
-        variables: { video: file },
-      });
+    const formData = new FormData();
+    formData.append("video_file", file);
+
+    try {
+      const response = await axios.post(
+        "http://localhost:8000/upload-video/",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+    } catch (error) {
+      console.error("Error:", error);
     }
+  };
+
+  const handleDragOver = (event) => {
+    event.preventDefault();
   };
 
   const handleDrop = (event) => {
