@@ -1,36 +1,34 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { Button, Card, Form } from "react-bootstrap";
-import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useMutation, gql } from "@apollo/client";
 
 const ADD_VIDEO_MUTATION = gql`
-  mutation addVideoMutation($video: Upload!) {
+  mutation Mutation($video: Upload!) {
     createVideo(video: $video) {
-      error
+      video
       success
-      video {
-        name
-        url
-      }
+      error
     }
   }
 `;
 
 function UploadVideo() {
   const [file, setFile] = useState(null);
-  const inputRef = useRef();
-  const navigate = useNavigate();
+  const inputRef = useRef(null);
   const { t } = useTranslation();
   const [fileStatus, setFileStatus] = useState("");
 
   const [upload] = useMutation(ADD_VIDEO_MUTATION, {
     onCompleted: (data) => {
       if (data.createVideo.success) {
-        navigate("/home");
+        setFileStatus("success");
       } else {
         setFileStatus("Błąd dodawania filmu!");
       }
+    },
+    onError: (error) => {
+      console.error("Mutacja GraphQL zwróciła błąd: ", error);
     },
   });
 
@@ -40,6 +38,7 @@ function UploadVideo() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+    console.log(file);
     if (file) {
       await upload({
         variables: { video: file },
@@ -50,7 +49,7 @@ function UploadVideo() {
   const handleDrop = (event) => {
     event.preventDefault();
     const newFile = event.dataTransfer.files[0];
-    if (newFile && newFile.type.startsWith("video/")) {
+    if (newFile) {
       setFile(newFile);
     } else {
       alert(t("fileSelectAlert"));
@@ -58,27 +57,17 @@ function UploadVideo() {
   };
 
   const handleSelectFiles = (event) => {
+    event.preventDefault();
     const newFile = event.target.files[0];
-    if (newFile && newFile.type.startsWith("video/")) {
+    if (newFile) {
       setFile(newFile);
     } else {
       alert(t("fileSelectAlert"));
     }
   };
-  // useEffect(() => {
-  //   const fileData = localStorage.getItem("fileData");
-  //   if (fileData) {
-  //     const parsedFileData = JSON.parse(fileData);
-  //     setFile({
-  //       name: parsedFileData.name,
-  //       type: parsedFileData.type,
-  //     });
-  //   }
-  // }, []);
 
   const handleRemoveFile = () => {
     setFile(null);
-    localStorage.removeItem("fileData");
   };
 
   return (
@@ -99,9 +88,9 @@ function UploadVideo() {
             <input
               type="file"
               onChange={handleSelectFiles}
-              accept=".mp4, .mov, .wmv, .avi"
               hidden
               ref={inputRef}
+              accept="video/*"
             />
           </Card.Body>
         </Card>
@@ -109,7 +98,6 @@ function UploadVideo() {
           className="button"
           variant="dark"
           type="submit"
-          onClick={() => navigate("/addVideo")}
           disabled={!file}
         >
           {t("upload")}

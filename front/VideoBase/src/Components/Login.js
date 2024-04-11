@@ -11,6 +11,7 @@ import "../CSS/utilities.css";
 import "../CSS/navbar.css";
 import "../CSS/layout.css";
 import "../CSS/card.css";
+import "../CSS/col.css";
 
 const LOGIN_MUTATION = gql`
   mutation Mutation($username: String!, $password: String!) {

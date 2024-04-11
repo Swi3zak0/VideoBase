@@ -40,7 +40,7 @@ function Home() {
   }, [location.search]);
 
   return (
-    <Container>
+    <Container fluid>
       <div>
         {successMessage && (
           <div className="alert alert-success" role="alert">
@@ -54,7 +54,7 @@ function Home() {
         )}
       </div>
       <Row>
-        <Col md={3} className="popular">
+        <Col md={3}>
           <Card>
             <Card.Header>Popular</Card.Header>
             <ListGroup>
@@ -65,33 +65,21 @@ function Home() {
             </ListGroup>
           </Card>
         </Col>
-        <Col>
-          <Col md={8} className="videos-centered">
-            {["1", "2", "3", "4"].map(() => (
-              <Row>
-                <Col>
-                  <Card>
-                    <CardHeader>Osoba Dodająca</CardHeader>
-                    <Card.Body>
-                      <Card.Title>Tytuł</Card.Title>
-                      <Image src={video} alt="Opis zdjecia" />
-                    </Card.Body>
-                  </Card>
-                  <ButtonGroup className="mt-auto p-2">
-                    <Button variant="outline-primary" className="m-1">
-                      Like
-                    </Button>
-                    <Button variant="outline-secondary" className="m-1">
-                      Comment
-                    </Button>
-                    <Button variant="outline-dark" className="m-1">
-                      Share
-                    </Button>
-                  </ButtonGroup>
-                </Col>
-              </Row>
-            ))}
-          </Col>
+        <Col md={7}>
+          {["1", "2", "3", "4"].map(() => (
+            <Card className="mb-3">
+              <CardHeader>Osoba Dodająca</CardHeader>
+              <Card.Body>
+                <Card.Title>Tytuł</Card.Title>
+                <Image src={video} alt="Opis zdjecia" fluid />
+              </Card.Body>
+              <ButtonGroup className="m-2">
+                <Button variant="outline-primary">Like</Button>
+                <Button variant="outline-secondary">Comment</Button>
+                <Button variant="outline-dark">Share</Button>
+              </ButtonGroup>
+            </Card>
+          ))}
         </Col>
       </Row>
     </Container>
