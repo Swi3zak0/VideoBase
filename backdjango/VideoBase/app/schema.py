@@ -28,6 +28,22 @@ class Query(graphene.ObjectType):
     def resolve_check_token(self, info):
         return True
     
+    @login_required
+    def search_post(self, info, search=None, category=None):
+        queryset = PostModel.objects.all()
+
+        if search:
+            keywords = search.split()
+            for keyword in keywords:
+                if keyword.startswith("#"):
+                    queryset = queryset.filter(tags__icontains=keyword)
+                else:
+                    queryset = queryset.filter(title__icontains=keyword)
+
+        if category:
+            queryset = queryset.filter(category=category)
+    
+        return queryset
 
 
 class Mutation(graphene.ObjectType):
