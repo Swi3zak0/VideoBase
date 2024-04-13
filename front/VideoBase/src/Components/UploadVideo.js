@@ -28,7 +28,13 @@ function UploadVideo() {
           },
         }
       );
-      navigate("/addVideo");
+      if (response.data && response.data.url) {
+        setUploadStatus("Video załadowane pomyślnie!");
+        const videoUrl = response.data.url;
+        navigate("/addVideo", { state: { videoUrl: videoUrl } });
+      } else {
+        setUploadStatus("Błąd: serwer nie zwrócił URL wideo.");
+      }
     } catch (error) {
       setUploadStatus("Bład wgrywania video");
     }
@@ -60,6 +66,7 @@ function UploadVideo() {
 
   const handleRemoveFile = () => {
     setFile(null);
+    localStorage.removeItem("fileName");
   };
 
   return (

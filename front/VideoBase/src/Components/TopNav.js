@@ -7,14 +7,13 @@ import { Logout } from "./Logout";
 import { Search } from "./Search";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { getLoggedUser } from "./Login";
 
 function TopNav() {
   const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
   const { logout } = Logout();
   const navigate = useNavigate();
   const { t } = useTranslation();
-  const username = getLoggedUser();
+  const username = localStorage.getItem("username");
 
   return (
     <Container fluid className="no-padding">

@@ -1,28 +1,71 @@
 import "../CSS/Styles.css";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useState } from "react";
 import { Container, Row, Col, Card, Button, Form } from "react-bootstrap";
-import video from "../Images/video.jpg";
 import { useTranslation } from "react-i18next";
+import { useMutation, gql } from "@apollo/client";
+
+const POST_MUTATION = gql`
+  mutation postMutation(
+    $username: String!
+    $title: String!
+    $description: String!
+    $url: String!
+  ) {
+    postMutation(
+      username: $usrname
+      title: $title
+      description: $description
+      url: $url
+    ) {
+      username
+      title
+      description
+      url
+    }
+  }
+`;
 
 function AddVideo() {
   const filename = localStorage.getItem("fileName");
+  const [postStatus, setPostStatus] = useState("");
   const navigate = useNavigate();
-  const [selectedFile, setSelectedFile] = useState(null);
-  const [fileStatus, setFileStatus] = useState("");
   const { t } = useTranslation();
+  const location = useLocation();
+  const videoUrl = location.state?.videoUrl;
+  const [description, setDescription] = useState("");
+  const [title, setTitle] = useState("");
+  const username = localStorage.getItem("username");
 
-  const handleFileChange = (event) => {
-    setSelectedFile(event.target.file[0]);
+  const [post] = useMutation(POST_MUTATION, {
+    onCompleted: (data) => {
+      if (data.postMutation.success) {
+        setPostStatus("Film zostal dodany");
+      } else {
+        setPostStatus("Błąd dodawania filmiku!");
+      }
+    },
+  });
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    await post({
+      variables: {
+        username: username,
+        title: title,
+        description: description,
+        url: videoUrl,
+      },
+    });
   };
 
   return (
-    <Container>
+    <Container onSubmit={handleSubmit}>
       <Row>
         <Col>
-          <Form.Label>"filename"</Form.Label>
+          <Form.Label>{filename}</Form.Label>
           <Card>
-            <Card.Img src={video} />
+            <video src={videoUrl} style={{ width: "100%" }} />
           </Card>
         </Col>
         <Col>
@@ -30,7 +73,11 @@ function AddVideo() {
             <h1>{t("videoInfo")}</h1>
             <Form.Group>
               <Form.Label>{t("titleRequired")}</Form.Label>
-              <Form.Control type="text" placeholder={t("enterTitle")} />
+              <Form.Control
+                type="text"
+                placeholder={t("enterTitle")}
+                onChange={(e) => setTitle(e.target.value)}
+              />
             </Form.Group>
 
             <Form.Group>
@@ -39,6 +86,7 @@ function AddVideo() {
                 as="textarea"
                 rows={3}
                 placeholder={t("enterDescription")}
+                onChange={(e) => setDescription(e.target.value)}
               />
               <Form.Text className="text-muted">0/3000</Form.Text>
             </Form.Group>
@@ -68,7 +116,7 @@ function AddVideo() {
             >
               {t("backButton")}
             </Button>
-            {fileStatus && <p className="danger">{fileStatus}</p>}
+            {postStatus && <p>{postStatus}</p>}
           </Form>
         </Col>
       </Row>

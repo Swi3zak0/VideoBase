@@ -23,3 +23,13 @@
   padding: 30px;
   font-weight: bolder;
 }
+.views-count {
+  float: right;
+  padding: 10px;
+  margin-right: 20px;
+}
+.min-height {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}

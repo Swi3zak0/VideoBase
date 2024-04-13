@@ -12,6 +12,9 @@ import "../CSS/navbar.css";
 import "../CSS/layout.css";
 import "../CSS/card.css";
 import "../CSS/col.css";
+import "../CSS/video.css";
+import "../CSS/footer.css";
+import "../CSS/row.css";
 
 const LOGIN_MUTATION = gql`
   mutation Mutation($username: String!, $password: String!) {
@@ -23,10 +26,6 @@ const LOGIN_MUTATION = gql`
     }
   }
 `;
-
-export const getLoggedUser = () => {
-  return localStorage.getItem("username");
-};
 
 function Login() {
   const [username, setUsername] = useState("");

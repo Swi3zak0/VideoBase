@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from "react";
-import video from "../Images/video.jpg";
+import { FaRegCommentDots, FaEye } from "react-icons/fa";
+import { SlLike, SlDislike } from "react-icons/sl";
+import { useLocation } from "react-router-dom";
+import { useQuery, gql } from "@apollo/client";
 import "../CSS/Styles.css";
 import {
   CardHeader,
@@ -10,10 +13,7 @@ import {
   Card,
   Button,
   ButtonGroup,
-  Image,
 } from "react-bootstrap";
-import { useLocation } from "react-router-dom";
-import { useQuery, gql } from "@apollo/client";
 
 const POST_QUERY = gql`
   query MyQuery {
@@ -28,6 +28,8 @@ function Home() {
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const { data } = useQuery(POST_QUERY);
+  const [liked, setLiked] = useState(false);
+  const [disliked, setDisliked] = useState(false);
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
@@ -48,6 +50,20 @@ function Home() {
       return () => clearTimeout(errorTimeoutId);
     }
   }, [location.search]);
+
+  const handleLike = () => {
+    setLiked(!liked);
+    if (disliked) {
+      setDisliked(false);
+    }
+  };
+
+  const handleDislike = () => {
+    setDisliked(!disliked);
+    if (liked) {
+      setLiked(false);
+    }
+  };
 
   return (
     <Container fluid>
@@ -82,14 +98,39 @@ function Home() {
               <Card key={index} className="mb-3">
                 <CardHeader>Osoba Dodająca</CardHeader>
                 <Card.Body>
-                  <Card.Title>Tytuł</Card.Title>
-                  <Image src={video.url} alt="Opis wideo" fluid />
+                  <Card.Title>title</Card.Title>
+                  <video
+                    className="video"
+                    src={video.url}
+                    alt="wideo"
+                    controls="controls"
+                    style={{ width: "100%" }}
+                  />{" "}
                 </Card.Body>
-                <ButtonGroup className="m-2">
-                  <Button variant="outline-primary">Like</Button>
-                  <Button variant="outline-secondary">Comment</Button>
-                  <Button variant="outline-dark">Share</Button>
-                </ButtonGroup>
+                <div>
+                  <ButtonGroup className="m-2">
+                    <Button
+                      onClick={handleLike}
+                      variant={liked ? "dark" : "light"}
+                    >
+                      <SlLike />
+                      10
+                    </Button>
+                    <br />
+                    <Button
+                      variant={disliked ? "dark" : "light"}
+                      onClick={handleDislike}
+                    >
+                      <SlDislike />2
+                    </Button>
+                  </ButtonGroup>
+                  <Button variant="light">
+                    Comment <FaRegCommentDots />
+                  </Button>
+                  <div className="views-count">
+                    <FaEye /> 12
+                  </div>
+                </div>
               </Card>
             ))}
         </Col>
