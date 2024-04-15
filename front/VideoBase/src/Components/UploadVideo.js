@@ -49,6 +49,7 @@ function UploadVideo() {
     const newFile = event.dataTransfer.files[0];
     if (newFile) {
       setFile(newFile);
+      localStorage.setItem("fileName", newFile.name);
     } else {
       alert(t("fileSelectAlert"));
     }
@@ -59,6 +60,7 @@ function UploadVideo() {
     const newFile = event.target.files[0];
     if (newFile) {
       setFile(newFile);
+      localStorage.setItem("fileName", newFile.name);
     } else {
       alert(t("fileSelectAlert"));
     }

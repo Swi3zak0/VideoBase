@@ -60,15 +60,16 @@ function AddVideo() {
   };
 
   return (
-    <Container onSubmit={handleSubmit}>
+    <Container fluid onSubmit={handleSubmit}>
       <Row>
-        <Col>
+        <Col md={6}>
+          <br />
           <Form.Label>{filename}</Form.Label>
           <Card>
-            <video src={videoUrl} style={{ width: "100%" }} />
+            <video src={videoUrl} style={{ width: "100%", height: "auto" }} />
           </Card>
         </Col>
-        <Col>
+        <Col md={5} className="col">
           <Form>
             <h1>{t("videoInfo")}</h1>
             <Form.Group>
