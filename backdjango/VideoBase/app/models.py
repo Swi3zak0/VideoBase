@@ -45,7 +45,7 @@ class Post(models.Model):
     video = models.ForeignKey(Video, on_delete=models.CASCADE)
     is_private = models.BooleanField(default=True)
     expiration_date = models.DateTimeField(null=True, blank=True)
-    short_url = models.CharField(max_length=15, null=False, unique=True)
+    short_url = models.CharField(max_length=255, null=False, unique=True)
     # expirated = models.BooleanField(default=False)
     # views = models.IntegerField(default=0)
     # category = models.ForeignKey(Category, null=True, on_delete=models.CASCADE)

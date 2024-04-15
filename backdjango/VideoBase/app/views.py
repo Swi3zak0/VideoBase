@@ -92,8 +92,9 @@ class VideoUploadAPIView(APIView):
                 bucket_name = FIREBASE_STORAGE_BUCKET_NAME
                 bucket = storage.bucket(bucket_name)
                 blob = bucket.blob(f'videos/{video_name}')
-                
-                blob.upload_from_file(video_file, content_type='video/mp4', predefined_acl='publicRead')
+
+                blob.upload_from_file(
+                    video_file, content_type='video/mp4', predefined_acl='publicRead')
 
                 video_url = blob.public_url
 
@@ -102,7 +103,8 @@ class VideoUploadAPIView(APIView):
 
                 return Response({'url': video_url}, status=status.HTTP_201_CREATED)
             except Exception as e:
-                error_message = f"An error occurred while uploading the video: {str(e)}"
+                error_message = f"An error occurred while uploading the video: {
+                    str(e)}"
                 return Response({'error': error_message}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         else:
             return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)

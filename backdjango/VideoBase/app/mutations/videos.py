@@ -29,7 +29,6 @@ from graphene import Mutation, String, Boolean, Field
 #             error_message = f"An error occurred while uploading the video: {str(e)}"
 #             return CreateVideoMutation(success=False, video=None, error=error_message)
 
-        
 
 # class UpdateVideoMutation(graphene.Mutation):
 #     class Arguments:
@@ -44,10 +43,10 @@ from graphene import Mutation, String, Boolean, Field
 #     def mutate(root, info, video_id, video):
 #         try:
 #             video_obj = Video.objects.get(pk=video_id)
-            
+
 #             bucket = storage.bucket()
 #             blob = bucket.blob(f"videos/{video.name}.{random.random()}")
-            
+
 #             blob.upload_from_file(video, content_type=video.content_type)
 #             blob.make_public()
 
@@ -59,7 +58,7 @@ from graphene import Mutation, String, Boolean, Field
 #         except Exception as e:
 #             error_message = f"An error occurred while updating the video: {str(e)}"
 #             return UpdateVideoMutation(success=False, video=None, error=error_message)
-        
+
 
 # class DeleteVideoMutation(graphene.Mutation):
 #     class Arguments:
@@ -72,7 +71,7 @@ from graphene import Mutation, String, Boolean, Field
 #     def mutate(root, info, video_id):
 #         try:
 #             video_obj = Video.objects.get(pk=video_id)
-            
+
 #             bucket = storage.bucket()
 #             blob = bucket.blob(f"videos/{video_obj.name}")
 #             blob.delete()
@@ -83,5 +82,3 @@ from graphene import Mutation, String, Boolean, Field
 #         except Exception as e:
 #             error_message = f"An error occurred while deleting the video: {str(e)}"
 #             return DeleteVideoMutation(success=False, error=error_message)
-
-

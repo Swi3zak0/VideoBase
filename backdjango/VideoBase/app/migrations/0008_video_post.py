@@ -15,7 +15,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Video',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('name', models.CharField(max_length=255)),
                 ('url', models.CharField(max_length=255)),
             ],
@@ -23,15 +24,19 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Post',
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.BigAutoField(auto_created=True,
+                 primary_key=True, serialize=False, verbose_name='ID')),
                 ('title', models.CharField(max_length=25)),
-                ('description', models.TextField(blank=True, max_length=255, null=True)),
+                ('description', models.TextField(
+                    blank=True, max_length=255, null=True)),
                 ('create_time', models.DateTimeField(auto_now_add=True)),
                 ('is_private', models.BooleanField(default=True)),
                 ('expiration_date', models.DateTimeField(blank=True, null=True)),
                 ('short_url', models.CharField(max_length=15, unique=True)),
-                ('user', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
-                ('video', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='app.video')),
+                ('user', models.ForeignKey(
+                    null=True, on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
+                ('video', models.ForeignKey(
+                    on_delete=django.db.models.deletion.CASCADE, to='app.video')),
             ],
         ),
     ]
