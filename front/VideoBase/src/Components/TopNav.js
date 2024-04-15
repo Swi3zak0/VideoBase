@@ -47,7 +47,9 @@ function TopNav() {
                   {t("addVideo")}
                 </Button>
                 <Dropdown as={ButtonGroup}>
-                  <Button variant="outline-light">{username}</Button>
+                  <Button variant="outline-light">
+                    {t("hello")} {username}
+                  </Button>
                   <Dropdown.Toggle
                     split
                     variant="light"

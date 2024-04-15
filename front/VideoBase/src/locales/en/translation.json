@@ -56,5 +56,6 @@
   "username": "Username",
   "videoInfo": "Video Info",
   "welcome": "Welcome to our application!",
-  "loading": "Loading..."
+  "loading": "Loading...",
+  "hello": "Hello"
 }

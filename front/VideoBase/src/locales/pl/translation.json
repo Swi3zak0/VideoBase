@@ -21,6 +21,7 @@
   "forgotPassword": "Zapomniałeś hasła?",
   "goToLogin": "Przejdź do logowania",
   "incorrectData": "Błędne dane",
+  "loading": "Ładowanie...",
   "login": "Proszę się zalogować.",
   "logInButton": "Zaloguj",
   "loginError": "Logowanie nie powiodło się, spróbuj ponownie.",
@@ -56,5 +57,5 @@
   "username": "Nazwa użytkownika",
   "videoInfo": "Informacje o wideo",
   "welcome": "Witamy w naszej aplikacji!",
-  "loading": "Ładowanie..."
+  "hello": "Witaj"
 }

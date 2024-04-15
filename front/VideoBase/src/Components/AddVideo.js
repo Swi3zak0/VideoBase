@@ -6,22 +6,22 @@ import { useTranslation } from "react-i18next";
 import { useMutation, gql } from "@apollo/client";
 
 const POST_MUTATION = gql`
-  mutation postMutation(
-    $username: String!
+  mutation createPost(
     $title: String!
+    $videoUrl: String!
     $description: String!
-    $url: String!
+    $expirationDate: Int!
+    $isPrivate: Boolean!
   ) {
-    postMutation(
-      username: $usrname
+    createPost(
       title: $title
+      videoUrl: $videoUrl
       description: $description
-      url: $url
+      expirationDate: $expirationDate
+      isPrivate: $isPrivate
     ) {
-      username
-      title
-      description
-      url
+      errors
+      success
     }
   }
 `;
@@ -35,28 +35,39 @@ function AddVideo() {
   const videoUrl = location.state?.videoUrl;
   const [description, setDescription] = useState("");
   const [title, setTitle] = useState("");
-  const username = localStorage.getItem("username");
 
-  const [post] = useMutation(POST_MUTATION, {
+  const [createPost] = useMutation(POST_MUTATION, {
     onCompleted: (data) => {
-      if (data.postMutation.success) {
+      if (data.createPost.success) {
         setPostStatus("Film zostal dodany");
       } else {
-        setPostStatus("Błąd dodawania filmiku!");
+        setPostStatus("Błąd dodawania filmiku: ");
       }
+    },
+    onError: () => {
+      setPostStatus("Błąd dodawania filmiku: ");
     },
   });
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    await post({
-      variables: {
-        username: username,
-        title: title,
-        description: description,
-        url: videoUrl,
-      },
-    });
+    const expirationDate = new Date();
+    expirationDate.setDate(expirationDate.getDate() + 10);
+    const expirationDateInt = Math.floor(expirationDate.getTime() / 1000);
+
+    try {
+      await createPost({
+        variables: {
+          title: title,
+          description: description,
+          videoUrl: videoUrl,
+          expirationDate: expirationDateInt,
+          isPrivate: false,
+        },
+      });
+    } catch (error) {
+      setPostStatus("Błąd dodawania filmiku: ");
+    }
   };
 
   return (
