@@ -1,6 +1,7 @@
 from django.forms import ValidationError
 import graphene
 import graphql_jwt
+from django.db.models import Q
 from graphql_jwt.shortcuts import get_token, create_refresh_token, get_refresh_token
 from .models import CustomUser, Video
 from django.http import HttpResponse
@@ -10,6 +11,7 @@ from graphql_jwt.decorators import login_required
 from .models import Video as VideoModel
 from .models import Post as PostModel
 from .mutations.posts import CreatePostMutation
+
 # from .mutations.videos import CreateVideoMutation
 # , UpdateVideoMutation, DeleteVideoMutation
 
@@ -19,6 +21,7 @@ class Query(graphene.ObjectType):
     check_token = graphene.Boolean()
     all_videos = graphene.List(VideoType)
     all_posts = graphene.List(PostType)
+    search_post = graphene.List(PostType, search=graphene.String(), category=graphene.String())
 
     @login_required
     def resolve_all_videos(self, info):
@@ -27,27 +30,32 @@ class Query(graphene.ObjectType):
     @login_required
     def resolve_all_users(root, info):
         return CustomUser.objects.all()
-
+    
     @login_required
     def resolve_check_token(self, info):
         return True
     
     @login_required
-    def search_post(self, info, search=None, category=None):
+    def resolve_search_post(root, info, search=None, category=None):
         queryset = PostModel.objects.all()
+        
 
         if search:
             keywords = search.split()
+            combined_query = Q()
             for keyword in keywords:
                 if keyword.startswith("#"):
-                    queryset = queryset.filter(tags__icontains=keyword)
+                    combined_query |= Q(tags__icontains=keyword)
                 else:
-                    queryset = queryset.filter(title__icontains=keyword)
+                    combined_query |= Q(title__icontains=keyword)
+
+        queryset = queryset.filter(combined_query)
 
         if category:
             queryset = queryset.filter(category=category)
     
         return queryset
+    
     def resolve_all_posts(self, info):
         return PostModel.objects.all()
 
