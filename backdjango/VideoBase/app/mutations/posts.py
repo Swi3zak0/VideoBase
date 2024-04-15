@@ -4,9 +4,7 @@ from ..models import Video, CustomUser, Post
 from ..types.type import PostType
 from django.utils import timezone
 import base64
-
-
-
+import jwt
 
 class CreatePostMutation(graphene.Mutation):
     class Arguments:
@@ -18,7 +16,7 @@ class CreatePostMutation(graphene.Mutation):
 
     success = graphene.Boolean()
     errors = graphene.String()
-    post = graphene.Field(PostType)  # Assuming you have a PostType defined
+    post = graphene.Field(PostType)
 
     def mutate(
         self,
@@ -30,7 +28,19 @@ class CreatePostMutation(graphene.Mutation):
         expiration_date=None,
     ):
         try:
-            user = info.context.user
+            user = None
+
+            if "JWT" in info.context.COOKIES:
+                jwt_token = info.context.COOKIES["JWT"]
+                
+                try:
+                    payload = jwt.decode(jwt_token, "verification_token", algorithms=["HS256"])
+                    username = payload["username"]
+                    user = CustomUser.objects.get(username=username)
+                except jwt.ExpiredSignatureError:
+                    raise Exception("JWT token has expired")
+                except jwt.InvalidTokenError:
+                    raise Exception("Invalid JWT token")
 
             exp_date = None
             if is_private:
@@ -46,16 +56,14 @@ class CreatePostMutation(graphene.Mutation):
                 else:
                     exp_date = timezone.now() + timezone.timedelta(days=1)
 
-            # Fetch the Video object based on the provided URL
             video = Video.objects.get(url=video_url)
 
-            # Create the Post object
             post = Post.objects.create(
                 title=title,
                 description=description,
-                video_id=video.id,  # Use video ID instead of video object
+                video_id=video.id,
                 user=user,
-                short_url=video_url,  # Assuming you want to use video_url as short_url
+                short_url=video_url,
                 is_private=is_private,
                 expiration_date=exp_date,
             )
