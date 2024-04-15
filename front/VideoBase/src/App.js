@@ -13,6 +13,7 @@ import ResetPassword from "./Components/ResetPassword";
 import AddVideo from "./Components/AddVideo";
 import CheckToken from "./Components/CheckToken";
 import Footer from "./Components/Footer";
+import VideoPost from "./Components/VideoPost";
 
 const client = new ApolloClient({
   cache: new InMemoryCache(),
@@ -41,6 +42,7 @@ function App() {
             <Route path="/activated" element={<Activated />} />
             <Route path="/changePassword" element={<ChangePassword />} />
             <Route path="/addVideo" element={<AddVideo />} />
+            <Route path="/video/:id" element={<VideoPost />} />
           </Routes>
         </Router>
         <Footer />

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FaRegCommentDots, FaEye } from "react-icons/fa";
-import { SlLike, SlDislike } from "react-icons/sl";
-import { useLocation } from "react-router-dom";
+import { BiSolidLike, BiSolidDislike } from "react-icons/bi";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useQuery, gql } from "@apollo/client";
 import "../CSS/Styles.css";
 import {
@@ -18,6 +18,7 @@ import {
 const POST_QUERY = gql`
   query MyQuery {
     allVideos {
+      id
       url
     }
   }
@@ -25,6 +26,7 @@ const POST_QUERY = gql`
 
 function Home() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const { data } = useQuery(POST_QUERY);
@@ -65,6 +67,10 @@ function Home() {
     }
   };
 
+  const redirectToVideo = (video) => {
+    navigate(`/video/${video.id}`, { state: { videoUrl: video.url } });
+  };
+
   return (
     <Container fluid>
       <div>
@@ -80,7 +86,7 @@ function Home() {
         )}
       </div>
       <Row>
-        <Col md={3}>
+        <Col md={2}>
           <Card>
             <Card.Header>Popular</Card.Header>
             <ListGroup>
@@ -91,11 +97,15 @@ function Home() {
             </ListGroup>
           </Card>
         </Col>
-        <Col md={7}>
+        <Col md={5} className="offset-md-1">
           {data &&
             data.allVideos &&
             data.allVideos.map((video, index) => (
-              <Card key={index} className="mb-3">
+              <Card
+                key={index}
+                className="mb-4"
+                // onClick={() => redirectToVideo(video)}
+              >
                 <CardHeader>Osoba Dodająca</CardHeader>
                 <Card.Body>
                   <Card.Title>title</Card.Title>
@@ -109,19 +119,18 @@ function Home() {
                 </Card.Body>
                 <div>
                   <ButtonGroup className="m-2">
-                    <Button
-                      onClick={handleLike}
-                      variant={liked ? "dark" : "light"}
-                    >
-                      <SlLike />
+                    <Button onClick={handleLike} variant="light">
+                      <BiSolidLike
+                        style={{ color: liked ? "green" : "#000000" }}
+                      />
                       10
                     </Button>
                     <br />
-                    <Button
-                      variant={disliked ? "dark" : "light"}
-                      onClick={handleDislike}
-                    >
-                      <SlDislike />2
+                    <Button variant="light" onClick={handleDislike}>
+                      <BiSolidDislike
+                        style={{ color: disliked ? "red" : "#000000" }}
+                      />
+                      2
                     </Button>
                   </ButtonGroup>
                   <Button variant="light">
