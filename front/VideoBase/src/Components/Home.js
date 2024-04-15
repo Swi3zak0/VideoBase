@@ -17,9 +17,15 @@ import {
 
 const POST_QUERY = gql`
   query MyQuery {
-    allVideos {
-      id
-      url
+    allPosts {
+      shortUrl
+      title
+      user {
+        username
+      }
+      video {
+        id
+      }
     }
   }
 `;
@@ -99,49 +105,54 @@ function Home() {
         </Col>
         <Col md={5} className="offset-md-1">
           {data &&
-            data.allVideos &&
-            data.allVideos.map((video, index) => (
-              <Card
-                key={index}
-                className="mb-4"
-                // onClick={() => redirectToVideo(video)}
-              >
-                <CardHeader>Osoba Dodająca</CardHeader>
-                <Card.Body>
-                  <Card.Title>title</Card.Title>
-                  <video
-                    className="video"
-                    src={video.url}
-                    alt="wideo"
-                    controls="controls"
-                    style={{ width: "100%" }}
-                  />{" "}
-                </Card.Body>
-                <div>
-                  <ButtonGroup className="m-2">
-                    <Button onClick={handleLike} variant="light">
-                      <BiSolidLike
-                        style={{ color: liked ? "green" : "#000000" }}
-                      />
-                      10
+            data.allPosts &&
+            data.allPosts
+              .slice()
+              .reverse()
+              .map((post, index) => (
+                <Card
+                  key={index}
+                  className="mb-4"
+                  onClick={() => redirectToVideo(post)}
+                >
+                  <CardHeader>
+                    {post.user ? post.user.username : "Nieznany użytkownik"}
+                  </CardHeader>
+                  <Card.Body>
+                    <Card.Title>{post.title}</Card.Title>
+                    <video
+                      className="video"
+                      src={post.shortUrl}
+                      alt="wideo"
+                      controls="controls"
+                      style={{ width: "100%" }}
+                    />{" "}
+                  </Card.Body>
+                  <div>
+                    <ButtonGroup className="m-2">
+                      <Button onClick={handleLike} variant="light">
+                        <BiSolidLike
+                          style={{ color: liked ? "green" : "#000000" }}
+                        />
+                        10
+                      </Button>
+                      <br />
+                      <Button variant="light" onClick={handleDislike}>
+                        <BiSolidDislike
+                          style={{ color: disliked ? "red" : "#000000" }}
+                        />
+                        2
+                      </Button>
+                    </ButtonGroup>
+                    <Button variant="light">
+                      Comment <FaRegCommentDots />
                     </Button>
-                    <br />
-                    <Button variant="light" onClick={handleDislike}>
-                      <BiSolidDislike
-                        style={{ color: disliked ? "red" : "#000000" }}
-                      />
-                      2
-                    </Button>
-                  </ButtonGroup>
-                  <Button variant="light">
-                    Comment <FaRegCommentDots />
-                  </Button>
-                  <div className="views-count">
-                    <FaEye /> 12
+                    <div className="views-count">
+                      <FaEye /> 12
+                    </div>
                   </div>
-                </div>
-              </Card>
-            ))}
+                </Card>
+              ))}
         </Col>
       </Row>
     </Container>

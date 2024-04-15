@@ -48,7 +48,7 @@ function TopNav() {
                 </Button>
                 <Dropdown as={ButtonGroup}>
                   <Button variant="outline-light">
-                    {t("hello")} {username}
+                    {t("hello")} {username} !
                   </Button>
                   <Dropdown.Toggle
                     split
