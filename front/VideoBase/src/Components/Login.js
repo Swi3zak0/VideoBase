@@ -47,6 +47,7 @@ function Login() {
       if (data.loginUser.success) {
         localStorage.setItem("isLoggedIn", "true");
         setIsLoggedIn(true);
+        localStorage.setItem("username", data.loginUser.user.username);
       } else {
         setLoginError(t("loginError"));
       }

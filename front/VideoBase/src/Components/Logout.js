@@ -16,7 +16,9 @@ export const Logout = () => {
 
   const [logoutMutation] = useMutation(LOGOUT_MUTATION, {
     onCompleted() {
+      localStorage.removeItem("username");
       localStorage.removeItem("isLoggedIn");
+      localStorage.removeItem("fileName");
       navigate("/login");
     },
   });

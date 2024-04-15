@@ -25,7 +25,11 @@ const POST_QUERY = gql`
       }
       video {
         id
+        url
       }
+    }
+    allUsers {
+      username
     }
   }
 `;
@@ -74,7 +78,9 @@ function Home() {
   };
 
   const redirectToVideo = (video) => {
-    navigate(`/video/${video.id}`, { state: { videoUrl: video.url } });
+    navigate(`/video/${video.video.id}`, {
+      state: { videoUrl: video.video.url },
+    });
   };
 
   return (
@@ -95,12 +101,13 @@ function Home() {
         <Col md={2}>
           <Card>
             <Card.Header>Popular</Card.Header>
-            <ListGroup>
-              <ListGroup.Item>Maciek</ListGroup.Item>
-              <ListGroup.Item>Patryk</ListGroup.Item>
-              <ListGroup.Item>Michał</ListGroup.Item>
-              <ListGroup.Item>Arek</ListGroup.Item>
-            </ListGroup>
+            {data &&
+              data.allUsers &&
+              data.allUsers.map((user, index) => (
+                <ListGroup key={index}>
+                  <ListGroup.Item>{user.username}</ListGroup.Item>
+                </ListGroup>
+              ))}
           </Card>
         </Col>
         <Col md={5} className="offset-md-1">
@@ -110,16 +117,14 @@ function Home() {
               .slice()
               .reverse()
               .map((post, index) => (
-                <Card
-                  key={index}
-                  className="mb-4"
-                  onClick={() => redirectToVideo(post)}
-                >
+                <Card key={index} className="mb-4">
                   <CardHeader>
                     {post.user ? post.user.username : "Nieznany użytkownik"}
                   </CardHeader>
                   <Card.Body>
-                    <Card.Title>{post.title}</Card.Title>
+                    <Card.Title onClick={() => redirectToVideo(post)}>
+                      {post.title}
+                    </Card.Title>
                     <video
                       className="video"
                       src={post.shortUrl}
