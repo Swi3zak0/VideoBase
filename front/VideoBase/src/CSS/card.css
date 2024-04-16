@@ -11,18 +11,11 @@
   border-radius: 8px;
   padding: 10px;
 }
-
+.card-title {
+  padding: 10px;
+}
 .card-text {
-  padding: 10px;
-}
-.custom-card-header {
-  padding: 10px;
-}
-
-.custom-card-title {
-  padding: 10px;
-}
-
-.custom-card-text {
+  border-radius: 8px;
+  box-shadow: 10px 10px 20px 5px rgba(94, 82, 82, 0.5);
   padding: 10px;
 }

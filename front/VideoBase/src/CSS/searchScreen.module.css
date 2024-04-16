@@ -1,0 +1,16 @@
+.custom-card {
+  padding: 10px;
+  width: 100%;
+  border: none;
+  margin-top: auto;
+  border-radius: 8px;
+}
+.customCardHeader {
+  padding: 10px;
+}
+.customCardTitle {
+  padding: 10px;
+}
+.customCardText {
+  padding: 10px;
+}
