@@ -159,17 +159,3 @@ class DislikePostMutation(graphene.Mutation):
 
         return DislikePostMutation(likes=likes, dislikes=dislikes, success=success)
     
-class checkLikesMutation(graphene.Mutation):
-    class Arguments:
-        post_id = graphene.ID(required=True)
-
-    likes = graphene.Int()
-    dislikes = graphene.Int()
-
-    def mutate(self, info, post_id):
-        post = Post.objects.get(id=post_id)
-        likes = post.likes.count()
-        dislikes = post.dislikes.count()
-
-        return checkLikesMutation(likes=likes, dislikes=dislikes)
-

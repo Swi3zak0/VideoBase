@@ -6,11 +6,11 @@ from graphql_jwt.shortcuts import get_token, create_refresh_token, get_refresh_t
 from .models import CustomUser, Video
 from django.http import HttpResponse
 from .mutations.users import RegisterUser, LoginUser, RequestPasswordReset, ResetPassword, ChangePasswordMutation, UsersType
-from .types.type import VideoType, PostType
+from .types.type import VideoType, PostType, LikesInfo
 from graphql_jwt.decorators import login_required
 from .models import Video as VideoModel
 from .models import Post as PostModel
-from .mutations.posts import CreatePostMutation, DislikePostMutation, LikePostMutation, checkLikesMutation
+from .mutations.posts import CreatePostMutation, DislikePostMutation, LikePostMutation
 
 # from .mutations.videos import CreateVideoMutation
 # , UpdateVideoMutation, DeleteVideoMutation
@@ -22,6 +22,7 @@ class Query(graphene.ObjectType):
     all_videos = graphene.List(VideoType)
     all_posts = graphene.List(PostType)
     search_post = graphene.List(PostType, search=graphene.String(), category=graphene.String())
+    check_likes = graphene.List(LikesInfo, post_id=graphene.Int())
 
     @login_required
     def resolve_all_videos(self, info):
@@ -57,7 +58,12 @@ class Query(graphene.ObjectType):
     
     def resolve_all_posts(self, info):
         return PostModel.objects.all()
-
+    
+    def resolve_check_likes(self, info, post_id=None):
+        post = PostModel.objects.get(id=post_id)
+        likes = post.likes.count()
+        dislikes = post.dislikes.count()
+        return [LikesInfo(likes=likes, dislikes=dislikes)]
 
 class Mutation(graphene.ObjectType):
     verify_token = graphql_jwt.Verify.Field()
@@ -73,7 +79,6 @@ class Mutation(graphene.ObjectType):
     create_post = CreatePostMutation.Field()
     like_post = LikePostMutation.Field()
     dislike_post = DislikePostMutation.Field()
-    check_likes = checkLikesMutation.Field()
 
 
     # create_video = CreateVideoMutation.Field()
