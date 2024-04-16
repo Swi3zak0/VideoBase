@@ -45,7 +45,7 @@ function VideoPost() {
             <Card.Body>
               <Card.Title>{videoTitle}</Card.Title>
               <video
-                className="video"
+                className="video cursor-pointer"
                 src={videoUrl}
                 alt="wideo"
                 controls="controls"

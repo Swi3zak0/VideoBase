@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { FaRegCommentDots, FaEye } from "react-icons/fa";
-import { BiSolidLike, BiSolidDislike } from "react-icons/bi";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useQuery, gql } from "@apollo/client";
+import { useQuery, useMutation, gql } from "@apollo/client";
 import {
   CardHeader,
   Container,
@@ -14,12 +12,17 @@ import {
   ButtonGroup,
   CardText,
 } from "react-bootstrap";
+import { FaRegCommentDots, FaEye, FaLeaf } from "react-icons/fa";
+import { BiSolidLike, BiSolidDislike } from "react-icons/bi";
 
 const POST_QUERY = gql`
   query MyQuery {
     allPosts {
+      dislikesCount
+      likesCount
       shortUrl
       title
+      id
       description
       user {
         username
@@ -35,13 +38,36 @@ const POST_QUERY = gql`
   }
 `;
 
+const LIKE_POST = gql`
+  mutation LikePost($postId: ID!) {
+    likePost(postId: $postId) {
+      likes
+      dislikes
+      success
+    }
+  }
+`;
+
+const DISLIKE_POST = gql`
+  mutation DislikePost($postId: ID!) {
+    dislikePost(postId: $postId) {
+      success
+      likes
+      dislikes
+    }
+  }
+`;
+
 function Home() {
   const location = useLocation();
   const navigate = useNavigate();
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const { data } = useQuery(POST_QUERY);
+  const { data, refetch } = useQuery(POST_QUERY);
   const [postInteractions, setPostInteractions] = useState({});
+
+  const [likePost] = useMutation(LIKE_POST);
+  const [dislikePost] = useMutation(DISLIKE_POST);
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
@@ -63,7 +89,12 @@ function Home() {
     }
     if (data && data.allPosts) {
       const initialInteractions = data.allPosts.reduce((acc, post) => {
-        acc[post.video.id] = { liked: false, disliked: false, views: 0 };
+        acc[post.id] = {
+          liked: false,
+          disliked: false,
+          likes: post.likesCount,
+          dislikes: post.dislikeCount,
+        };
         return acc;
       }, {});
       setPostInteractions(initialInteractions);
@@ -71,30 +102,56 @@ function Home() {
   }, [data, location.search]);
 
   const handleLike = (postId) => {
-    setPostInteractions((currentInteractions) => ({
-      ...currentInteractions,
-      [postId]: {
-        ...currentInteractions[postId],
-        liked: !currentInteractions[postId].liked,
-        disliked: false,
-      },
-    }));
+    const post = postInteractions[postId];
+    const currentlyLiked = post.liked;
+    const newLikesCount = currentlyLiked ? post.likes - 1 : post.likes + 1;
+
+    likePost({ variables: { postId } })
+      .then((response) => {
+        if (response.data.likePost.success) {
+          setPostInteractions((current) => ({
+            ...current,
+            [postId]: {
+              ...current[postId],
+              liked: !currentlyLiked,
+              disliked: false,
+              dislikes: response.data.likePost.dislikes,
+              likes: newLikesCount,
+            },
+          }));
+        }
+      })
+      .catch((error) => console.error("Error processing like:", error));
   };
 
   const handleDislike = (postId) => {
-    setPostInteractions((currentInteractions) => ({
-      ...currentInteractions,
-      [postId]: {
-        ...currentInteractions[postId],
-        disliked: !currentInteractions[postId].disliked,
-        liked: false,
-      },
-    }));
+    const post = postInteractions[postId];
+    const currentlyDisliked = post.disliked;
+    const newDislikesCount = currentlyDisliked
+      ? post.dislikes - 1
+      : post.dislikes + 1;
+
+    dislikePost({ variables: { postId } })
+      .then((response) => {
+        if (response.data.dislikePost.success) {
+          setPostInteractions((current) => ({
+            ...current,
+            [postId]: {
+              ...current[postId],
+              disliked: !currentlyDisliked,
+              liked: false,
+              likes: response.data.dislikePost.likes,
+              dislikes: newDislikesCount,
+            },
+          }));
+        }
+      })
+      .catch((error) => console.error("Error processing dislike:", error));
   };
 
   const redirectToVideo = (post, event) => {
     event.preventDefault();
-    navigate(`/video/${post.video.id}`, {
+    navigate(`/video/${post.id}`, {
       state: {
         videoUrl: post.video.url,
         videoTitle: post.title,
@@ -140,51 +197,53 @@ function Home() {
               .slice()
               .reverse()
               .map((post) => (
-                <Card key={post.video.id} className="mb-4">
+                <Card key={post.id} className="mb-4">
                   <CardHeader>
                     {post.user ? post.user.username : "Nieznany użytkownik"}
                   </CardHeader>
-                  <Card.Body onClick={(e) => redirectToVideo(post, e)}>
+                  <Card.Body
+                    className="cursor-pointer"
+                    onClick={(e) => redirectToVideo(post, e)}
+                  >
                     <Card.Title>{post.title}</Card.Title>
                     <div>
                       <video
                         className="video"
                         src={post.shortUrl}
                         alt="wideo"
-                        controls="controls"
+                        controls
                         style={{ width: "100%" }}
-                      />{" "}
+                      />
                     </div>
                     <CardText>{post.description}</CardText>
                   </Card.Body>
                   <div>
                     <ButtonGroup className="m-2">
                       <Button
-                        onClick={() => handleLike(post.video.id)}
+                        onClick={() => handleLike(post.id)}
                         variant="light"
                       >
                         <BiSolidLike
                           style={{
-                            color: postInteractions[post.video.id]?.liked
+                            color: postInteractions[post.id]?.liked
                               ? "green"
                               : "#000000",
                           }}
-                        />
-                        10
+                        />{" "}
+                        {postInteractions[post.id]?.likes || 0}
                       </Button>
-                      <br />
                       <Button
-                        onClick={() => handleDislike(post.video.id)}
+                        onClick={() => handleDislike(post.id)}
                         variant="light"
                       >
                         <BiSolidDislike
                           style={{
-                            color: postInteractions[post.video.id]?.disliked
+                            color: postInteractions[post.id]?.disliked
                               ? "red"
                               : "#000000",
                           }}
-                        />
-                        2
+                        />{" "}
+                        {postInteractions[post.id]?.dislikes || 0}
                       </Button>
                     </ButtonGroup>
                     <Button
