@@ -28,9 +28,11 @@ class Query(graphene.ObjectType):
     check_token = graphene.Boolean()
     all_videos = graphene.List(VideoType)
     all_posts = graphene.List(PostType)
-    search_post = graphene.List(PostType, search=graphene.String(), category=graphene.String())
+    search_post = graphene.List(
+        PostType, search=graphene.String(), category=graphene.String())
     check_likes = graphene.List(LikesInfo, post_id=graphene.Int())
-    post_comments = graphene.List(CommentType, post_id=graphene.ID(required=True))
+    post_comments = graphene.List(
+        CommentType, post_id=graphene.ID(required=True))
 
     @login_required
     def resolve_all_videos(self, info):
@@ -39,15 +41,15 @@ class Query(graphene.ObjectType):
     @login_required
     def resolve_all_users(root, info):
         return CustomUser.objects.all()
-    
+
     @login_required
     def resolve_check_token(self, info):
         return True
-    
+
     @login_required
     def resolve_search_post(root, info, search=None, category=None):
         queryset = PostModel.objects.all()
-        
+
         if search:
             keywords = search.split()
             combined_query = Q()
@@ -61,12 +63,12 @@ class Query(graphene.ObjectType):
 
         if category:
             queryset = queryset.filter(category=category)
-    
+
         return queryset
-    
+
     def resolve_all_posts(self, info):
         return PostModel.objects.all()
-    
+
     def resolve_check_likes(self, info, post_id=None):
         post = PostModel.objects.get(id=post_id)
         likes = post.likes.count()
@@ -81,6 +83,7 @@ class Query(graphene.ObjectType):
             return CommentModel.objects.filter(post=post)
         except PostModel.DoesNotExist:
             return []
+
 
 class Mutation(graphene.ObjectType):
     verify_token = graphql_jwt.Verify.Field()
@@ -97,8 +100,7 @@ class Mutation(graphene.ObjectType):
     like_post = LikePostMutation.Field()
     dislike_post = DislikePostMutation.Field()
 
-    create_coment = CreateCommentMutation.Field()
-
+    create_comment = CreateCommentMutation.Field()
 
     # create_video = CreateVideoMutation.Field()
     # update_video = UpdateVideoMutation.Field()
