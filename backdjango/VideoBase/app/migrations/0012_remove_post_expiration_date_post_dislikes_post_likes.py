@@ -18,11 +18,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='post',
             name='dislikes',
-            field=models.ManyToManyField(blank=True, related_name='dislikes', to=settings.AUTH_USER_MODEL),
+            field=models.ManyToManyField(
+                blank=True, related_name='dislikes', to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name='post',
             name='likes',
-            field=models.ManyToManyField(blank=True, related_name='likes', to=settings.AUTH_USER_MODEL),
+            field=models.ManyToManyField(
+                blank=True, related_name='likes', to=settings.AUTH_USER_MODEL),
         ),
     ]
