@@ -10,7 +10,7 @@ from .types.type import VideoType, PostType
 from graphql_jwt.decorators import login_required
 from .models import Video as VideoModel
 from .models import Post as PostModel
-from .mutations.posts import CreatePostMutation
+from .mutations.posts import CreatePostMutation, DislikePostMutation, LikePostMutation, checkLikesMutation
 
 # from .mutations.videos import CreateVideoMutation
 # , UpdateVideoMutation, DeleteVideoMutation
@@ -39,7 +39,6 @@ class Query(graphene.ObjectType):
     def resolve_search_post(root, info, search=None, category=None):
         queryset = PostModel.objects.all()
         
-
         if search:
             keywords = search.split()
             combined_query = Q()
@@ -70,7 +69,12 @@ class Mutation(graphene.ObjectType):
     request_password_reset = RequestPasswordReset.Field()
     reset_password = ResetPassword.Field()
     change_password = ChangePasswordMutation.Field()
+
     create_post = CreatePostMutation.Field()
+    like_post = LikePostMutation.Field()
+    dislike_post = DislikePostMutation.Field()
+    check_likes = checkLikesMutation.Field()
+
 
     # create_video = CreateVideoMutation.Field()
     # update_video = UpdateVideoMutation.Field()

@@ -21,6 +21,9 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     objects = UserManager()
 
+    def get_user_posts(self):
+        return Post.objects.filter(user=self)
+
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = []
 
@@ -49,8 +52,8 @@ class Post(models.Model):
     # expirated = models.BooleanField(default=False)
     # views = models.IntegerField(default=0)
     # category = models.ForeignKey(Category, null=True, on_delete=models.CASCADE)
-    # likes = models.ManyToManyField(CustomUser, related_name="likes", blank=True)
-    # dislikes = models.ManyToManyField(CustomUser, related_name="dislikes", blank=True)
+    likes = models.ManyToManyField(CustomUser, related_name="likes", blank=True)
+    dislikes = models.ManyToManyField(CustomUser, related_name="dislikes", blank=True)
 
     def __str__(self):
         return f"{self.title}"

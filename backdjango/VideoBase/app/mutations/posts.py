@@ -71,3 +71,100 @@ class CreatePostMutation(graphene.Mutation):
             return CreatePostMutation(success=True, post=post)
         except Exception as e:
             return CreatePostMutation(success=False, errors=str(e))
+
+
+class LikePostMutation(graphene.Mutation):
+    class Arguments:
+        post_id = graphene.ID(required=True)
+
+    number = graphene.Int()
+    success = graphene.Boolean()
+
+    def mutate(self, info, post_id):
+
+        if "JWT" in info.context.COOKIES:
+                jwt_token = info.context.COOKIES["JWT"]
+                
+                try:
+                    user = None
+                    payload = jwt.decode(jwt_token, "verification_token", algorithms=["HS256"])
+                    username = payload["username"]
+                    user = CustomUser.objects.get(username=username)
+                except jwt.ExpiredSignatureError:
+                    raise Exception("JWT token has expired")
+                except jwt.InvalidTokenError:
+                    raise Exception("Invalid JWT token")
+
+        if not user.is_authenticated:
+            raise Exception('Musisz być zalogowany, aby polubić post.')
+        try:
+            post = Post.objects.get(id=post_id)
+        except Post.DoesNotExist:
+            raise Exception('Post o podanym ID nie istnieje.')
+        if post.dislikes.contains(user):
+            post.dislikes.remove(user)
+
+        if post.likes.contains(user):
+            post.likes.remove(user)
+        else:
+            post.likes.add(user)
+
+        success = True
+        number = post.likes.count()
+
+        return LikePostMutation(number=number, success=success)
+
+    
+class DislikePostMutation(graphene.Mutation):
+    class Arguments:
+        post_id = graphene.ID(required=True)
+
+    number = graphene.Int()
+    success = graphene.Boolean()
+
+    def mutate(self, info, post_id):
+         
+        if "JWT" in info.context.COOKIES:
+                jwt_token = info.context.COOKIES["JWT"]
+                
+                try:
+                    user = None
+                    payload = jwt.decode(jwt_token, "verification_token", algorithms=["HS256"])
+                    username = payload["username"]
+                    user = CustomUser.objects.get(username=username)
+                except jwt.ExpiredSignatureError:
+                    raise Exception("JWT token has expired")
+                except jwt.InvalidTokenError:
+                    raise Exception("Invalid JWT token")
+
+        if not user.is_authenticated:
+            raise Exception('Musisz być zalogowany, aby polubić post.')
+        try:
+            post = Post.objects.get(id=post_id)
+        except Post.DoesNotExist:
+            raise Exception('Post o podanym ID nie istnieje.')
+        if post.likes.contains(user):
+            post.likes.remove(user)
+        if post.dislikes.contains(user):
+            post.dislikes.remove(user)
+        else:
+            post.dislikes.add(user)
+        success = True
+        number = post.dislikes.count()
+
+        return DislikePostMutation(number=number, success=success)
+    
+class checkLikesMutation(graphene.Mutation):
+    class Arguments:
+        post_id = graphene.ID(required=True)
+
+    likes = graphene.Int()
+    dislikes = graphene.Int()
+
+    def mutate(self, info, post_id):
+        post = Post.objects.get(id=post_id)
+        likes = post.likes.count()
+        dislikes = post.dislikes.count()
+
+        return checkLikesMutation(likes=likes, dislikes=dislikes)
+
