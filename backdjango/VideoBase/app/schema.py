@@ -11,6 +11,13 @@ from graphql_jwt.decorators import login_required
 from .models import Video as VideoModel
 from .models import Post as PostModel
 from .mutations.posts import CreatePostMutation, DislikePostMutation, LikePostMutation
+from .types.type import VideoType, PostType, CommentType
+from graphql_jwt.decorators import login_required
+from .models import Video as VideoModel
+from .models import Post as PostModel
+from .models import Comment as CommentModel
+from .mutations.posts import CreatePostMutation, DislikePostMutation, LikePostMutation, checkLikesMutation
+from .mutations.comments import CreateCommentMutation
 
 # from .mutations.videos import CreateVideoMutation
 # , UpdateVideoMutation, DeleteVideoMutation
@@ -23,6 +30,7 @@ class Query(graphene.ObjectType):
     all_posts = graphene.List(PostType)
     search_post = graphene.List(PostType, search=graphene.String(), category=graphene.String())
     check_likes = graphene.List(LikesInfo, post_id=graphene.Int())
+    post_comments = graphene.List(CommentType, post_id=graphene.ID(required=True))
 
     @login_required
     def resolve_all_videos(self, info):
@@ -65,6 +73,13 @@ class Query(graphene.ObjectType):
         dislikes = post.dislikes.count()
         return [LikesInfo(likes=likes, dislikes=dislikes)]
 
+    def resolve_post_comments(self, info, post_id):
+        try:
+            post = PostModel.objects.get(id=post_id)
+            return CommentModel.objects.filter(post=post)
+        except PostModel.DoesNotExist:
+            return []
+
 class Mutation(graphene.ObjectType):
     verify_token = graphql_jwt.Verify.Field()
     refresh_token = graphql_jwt.Refresh.Field()
@@ -79,6 +94,8 @@ class Mutation(graphene.ObjectType):
     create_post = CreatePostMutation.Field()
     like_post = LikePostMutation.Field()
     dislike_post = DislikePostMutation.Field()
+
+    create_coment = CreateCommentMutation.Field()
 
 
     # create_video = CreateVideoMutation.Field()

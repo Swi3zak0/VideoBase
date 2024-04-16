@@ -57,3 +57,12 @@ class Post(models.Model):
 
     def __str__(self):
         return f"{self.title}"
+    
+
+class Comment(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    comment = models.TextField()
+
+    def __str__(self):
+        return f"Comment by {self.user.username} on {self.post.title}"

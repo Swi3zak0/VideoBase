@@ -1,6 +1,6 @@
 import graphene
 from graphene_django import DjangoObjectType
-from app.models import CustomUser, Video, Post
+from app.models import CustomUser, Video, Post, Comment
 
 
 class UsersType(DjangoObjectType):
@@ -33,3 +33,7 @@ class LikesInfo(graphene.ObjectType):
     likes = graphene.Int()
     dislikes = graphene.Int()
 
+class CommentType(DjangoObjectType):
+    class Meta:
+        model = Comment
+        fields = "__all__"
