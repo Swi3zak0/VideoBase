@@ -13,6 +13,7 @@ import {
   Card,
   Button,
   ButtonGroup,
+  CardText,
 } from "react-bootstrap";
 
 const POST_QUERY = gql`
@@ -20,6 +21,7 @@ const POST_QUERY = gql`
     allPosts {
       shortUrl
       title
+      description
       user {
         username
       }
@@ -40,8 +42,7 @@ function Home() {
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const { data } = useQuery(POST_QUERY);
-  const [liked, setLiked] = useState(false);
-  const [disliked, setDisliked] = useState(false);
+  const [postInteractions, setPostInteractions] = useState({});
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
@@ -61,25 +62,48 @@ function Home() {
       }, 10000);
       return () => clearTimeout(errorTimeoutId);
     }
-  }, [location.search]);
-
-  const handleLike = () => {
-    setLiked(!liked);
-    if (disliked) {
-      setDisliked(false);
+    if (data && data.allPosts) {
+      const initialInteractions = data.allPosts.reduce((acc, post) => {
+        acc[post.video.id] = { liked: false, disliked: false, views: 0 };
+        return acc;
+      }, {});
+      setPostInteractions(initialInteractions);
     }
+  }, [data, location.search]);
+
+  const handleLike = (postId) => {
+    setPostInteractions((currentInteractions) => ({
+      ...currentInteractions,
+      [postId]: {
+        ...currentInteractions[postId],
+        liked: !currentInteractions[postId].liked,
+        disliked: false,
+      },
+    }));
   };
 
-  const handleDislike = () => {
-    setDisliked(!disliked);
-    if (liked) {
-      setLiked(false);
-    }
+  const handleDislike = (postId) => {
+    setPostInteractions((currentInteractions) => ({
+      ...currentInteractions,
+      [postId]: {
+        ...currentInteractions[postId],
+        disliked: !currentInteractions[postId].disliked,
+        liked: false,
+      },
+    }));
   };
 
-  const redirectToVideo = (video) => {
-    navigate(`/video/${video.video.id}`, {
-      state: { videoUrl: video.video.url },
+  const redirectToVideo = (post, event) => {
+    event.preventDefault();
+    navigate(`/video/${post.video.id}`, {
+      state: {
+        videoUrl: post.video.url,
+        videoTitle: post.title,
+        videoDescription: post.description,
+        uploaderName: post.user
+          ? post.user.username
+          : "Niezalogowany użytkownik",
+      },
     });
   };
 
@@ -116,40 +140,58 @@ function Home() {
             data.allPosts
               .slice()
               .reverse()
-              .map((post, index) => (
-                <Card key={index} className="mb-4">
+              .map((post) => (
+                <Card key={post.video.id} className="mb-4">
                   <CardHeader>
                     {post.user ? post.user.username : "Nieznany użytkownik"}
                   </CardHeader>
-                  <Card.Body>
-                    <Card.Title onClick={() => redirectToVideo(post)}>
-                      {post.title}
-                    </Card.Title>
-                    <video
-                      className="video"
-                      src={post.shortUrl}
-                      alt="wideo"
-                      controls="controls"
-                      style={{ width: "100%" }}
-                    />{" "}
+                  <Card.Body onClick={(e) => redirectToVideo(post, e)}>
+                    <Card.Title>{post.title}</Card.Title>
+                    <div>
+                      <video
+                        className="video"
+                        src={post.shortUrl}
+                        alt="wideo"
+                        controls="controls"
+                        style={{ width: "100%" }}
+                      />{" "}
+                    </div>
+                    <CardText>{post.description}</CardText>
                   </Card.Body>
                   <div>
                     <ButtonGroup className="m-2">
-                      <Button onClick={handleLike} variant="light">
+                      <Button
+                        onClick={() => handleLike(post.video.id)}
+                        variant="light"
+                      >
                         <BiSolidLike
-                          style={{ color: liked ? "green" : "#000000" }}
+                          style={{
+                            color: postInteractions[post.video.id]?.liked
+                              ? "green"
+                              : "#000000",
+                          }}
                         />
                         10
                       </Button>
                       <br />
-                      <Button variant="light" onClick={handleDislike}>
+                      <Button
+                        onClick={() => handleDislike(post.video.id)}
+                        variant="light"
+                      >
                         <BiSolidDislike
-                          style={{ color: disliked ? "red" : "#000000" }}
+                          style={{
+                            color: postInteractions[post.video.id]?.disliked
+                              ? "red"
+                              : "#000000",
+                          }}
                         />
                         2
                       </Button>
                     </ButtonGroup>
-                    <Button variant="light">
+                    <Button
+                      variant="light"
+                      onClick={(e) => redirectToVideo(post, e)}
+                    >
                       Comment <FaRegCommentDots />
                     </Button>
                     <div className="views-count">

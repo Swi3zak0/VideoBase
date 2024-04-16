@@ -32,7 +32,6 @@ function UploadVideo() {
         setUploadStatus("Video załadowane pomyślnie!");
         const videoUrl = response.data.url;
         navigate("/addVideo", { state: { videoUrl: videoUrl } });
-        console.log(videoUrl);
       } else {
         setUploadStatus("Błąd: serwer nie zwrócił URL wideo.");
       }

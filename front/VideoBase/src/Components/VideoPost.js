@@ -6,6 +6,8 @@ import {
   CardHeader,
   ButtonGroup,
   Button,
+  CardText,
+  CardTitle,
 } from "react-bootstrap";
 import { useParams, useLocation } from "react-router-dom";
 import { BiSolidLike, BiSolidDislike } from "react-icons/bi";
@@ -16,6 +18,9 @@ function VideoPost() {
   const { id } = useParams();
   const location = useLocation();
   const videoUrl = location.state?.videoUrl;
+  const videoTitle = location.state?.videoTitle;
+  const username = location.state?.uploaderName;
+  const videoDescription = location.state?.videoDescription;
   const [liked, setLiked] = useState(false);
   const [disliked, setDisliked] = useState(false);
 
@@ -34,13 +39,13 @@ function VideoPost() {
   };
 
   return (
-    <Container>
+    <Container fluid>
       <Row>
-        <Col>
+        <Col md={7}>
           <Card>
-            <CardHeader>Osoba Dodająca</CardHeader>
+            <CardHeader>{username}</CardHeader>
             <Card.Body>
-              <Card.Title>title</Card.Title>
+              <Card.Title>{videoTitle}</Card.Title>
               <video
                 className="video"
                 src={videoUrl}
@@ -48,6 +53,7 @@ function VideoPost() {
                 controls="controls"
                 style={{ width: "100%" }}
               />{" "}
+              <CardText>{videoDescription}</CardText>
             </Card.Body>
             <div>
               <ButtonGroup className="m-2">
@@ -70,6 +76,12 @@ function VideoPost() {
                 <FaEye /> 12
               </div>
             </div>
+          </Card>
+        </Col>
+        <Col md={{ span: 3, offset: 1 }}>
+          <Card>
+            <CardHeader>Recomended</CardHeader>
+            <CardText>recomended</CardText>
           </Card>
         </Col>
       </Row>

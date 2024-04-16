@@ -1,7 +1,15 @@
 import "../CSS/Styles.css";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useState } from "react";
-import { Container, Row, Col, Card, Button, Form } from "react-bootstrap";
+import {
+  Container,
+  Row,
+  Col,
+  Card,
+  Button,
+  Form,
+  FormCheck,
+} from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 import { useMutation, gql } from "@apollo/client";
 
@@ -35,6 +43,7 @@ function AddVideo() {
   const videoUrl = location.state?.videoUrl;
   const [description, setDescription] = useState("");
   const [title, setTitle] = useState("");
+  const [isPrivate, setIsPrivate] = useState(false);
 
   const [createPost] = useMutation(POST_MUTATION, {
     onCompleted: (data) => {
@@ -62,7 +71,7 @@ function AddVideo() {
           description: description,
           videoUrl: videoUrl,
           expirationDate: expirationDateInt,
-          isPrivate: false,
+          isPrivate: isPrivate,
         },
       });
     } catch (error) {
@@ -118,9 +127,19 @@ function AddVideo() {
               <Form.Control type="text" placeholder="#cats, #dogs" />
             </Form.Group>
 
+            <Form>
+              <FormCheck
+                type="checkbox"
+                id="check"
+                label="Private"
+                onChange={(e) => setIsPrivate(e.target.checked)}
+              />
+            </Form>
+
             <Button className="button" variant="dark" type="submit">
               {t("addButton")}
             </Button>
+
             <Button
               className="button"
               variant="dark"
@@ -128,6 +147,7 @@ function AddVideo() {
             >
               {t("backButton")}
             </Button>
+
             {postStatus && <p>{postStatus}</p>}
           </Form>
         </Col>

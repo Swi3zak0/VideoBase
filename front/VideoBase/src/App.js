@@ -37,7 +37,7 @@ function App() {
               path="/newPassword/:uid/:reset_code"
               element={<NewPassword />}
             />
-            <Route path="/search" element={<Search />} />
+            <Route path="/search/:keywords" element={<Search />} />
             <Route path="/uploadVideo" element={<UploadVideo />} />
             <Route path="/activated" element={<Activated />} />
             <Route path="/changePassword" element={<ChangePassword />} />
