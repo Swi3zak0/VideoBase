@@ -77,7 +77,8 @@ class LikePostMutation(graphene.Mutation):
     class Arguments:
         post_id = graphene.ID(required=True)
 
-    number = graphene.Int()
+    dislikes = graphene.Int()
+    likes = graphene.Int()
     success = graphene.Boolean()
 
     def mutate(self, info, post_id):
@@ -110,16 +111,18 @@ class LikePostMutation(graphene.Mutation):
             post.likes.add(user)
 
         success = True
-        number = post.likes.count()
+        likes = post.likes.count()
+        dislikes = post.likes.count()
 
-        return LikePostMutation(number=number, success=success)
+        return LikePostMutation(likes=likes, dislikes=dislikes, success=success)
 
     
 class DislikePostMutation(graphene.Mutation):
     class Arguments:
         post_id = graphene.ID(required=True)
 
-    number = graphene.Int()
+    likes = graphene.Int()
+    dislikes = graphene.Int()
     success = graphene.Boolean()
 
     def mutate(self, info, post_id):
@@ -149,10 +152,12 @@ class DislikePostMutation(graphene.Mutation):
             post.dislikes.remove(user)
         else:
             post.dislikes.add(user)
-        success = True
-        number = post.dislikes.count()
 
-        return DislikePostMutation(number=number, success=success)
+        success = True
+        likes = post.likes.count()
+        dislikes = post.likes.count()
+
+        return DislikePostMutation(likes=likes, dislikes=dislikes, success=success)
     
 class checkLikesMutation(graphene.Mutation):
     class Arguments:
