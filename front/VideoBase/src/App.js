@@ -5,7 +5,6 @@ import TopNav from "./Components/TopNav";
 import Home from "./Components/Home";
 import ChangePassword from "./Components/ChangePassword";
 import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
-import { Search } from "./Components/Search";
 import UploadVideo from "./Components/UploadVideo";
 import Activated from "./Components/Activated";
 import NewPassword from "./Components/NewPassword";
@@ -14,6 +13,7 @@ import AddVideo from "./Components/AddVideo";
 import CheckToken from "./Components/CheckToken";
 import Footer from "./Components/Footer";
 import VideoPost from "./Components/VideoPost";
+import SearchScreen from "./Components/SearchScreen";
 
 const client = new ApolloClient({
   cache: new InMemoryCache(),
@@ -37,7 +37,7 @@ function App() {
               path="/newPassword/:uid/:reset_code"
               element={<NewPassword />}
             />
-            <Route path="/search/:keywords" element={<Search />} />
+            <Route path="/search/:keywords" element={<SearchScreen />} />
             <Route path="/uploadVideo" element={<UploadVideo />} />
             <Route path="/activated" element={<Activated />} />
             <Route path="/changePassword" element={<ChangePassword />} />

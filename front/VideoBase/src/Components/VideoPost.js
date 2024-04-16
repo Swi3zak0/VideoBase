@@ -7,7 +7,6 @@ import {
   ButtonGroup,
   Button,
   CardText,
-  CardTitle,
 } from "react-bootstrap";
 import { useParams, useLocation } from "react-router-dom";
 import { BiSolidLike, BiSolidDislike } from "react-icons/bi";
@@ -15,7 +14,6 @@ import { FaRegCommentDots, FaEye } from "react-icons/fa";
 import { useState } from "react";
 
 function VideoPost() {
-  const { id } = useParams();
   const location = useLocation();
   const videoUrl = location.state?.videoUrl;
   const videoTitle = location.state?.videoTitle;

@@ -3,7 +3,6 @@ import { FaRegCommentDots, FaEye } from "react-icons/fa";
 import { BiSolidLike, BiSolidDislike } from "react-icons/bi";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useQuery, gql } from "@apollo/client";
-import "../CSS/Styles.css";
 import {
   CardHeader,
   Container,

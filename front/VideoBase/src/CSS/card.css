@@ -8,6 +8,14 @@
 .card-header {
   background-color: #3d3d3d;
   color: #fff;
-  border-top-left-radius: 15px;
-  border-top-right-radius: 15px;
+  border-radius: 8px;
+  padding: 10px;
+}
+.card-title {
+  padding: 10px;
+}
+.card-text {
+  border-radius: 8px;
+  box-shadow: 10px 10px 20px 5px rgba(94, 82, 82, 0.5);
+  padding: 10px;
 }

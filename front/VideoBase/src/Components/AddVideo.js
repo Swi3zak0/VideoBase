@@ -18,14 +18,12 @@ const POST_MUTATION = gql`
     $title: String!
     $videoUrl: String!
     $description: String!
-    $expirationDate: Int!
     $isPrivate: Boolean!
   ) {
     createPost(
       title: $title
       videoUrl: $videoUrl
       description: $description
-      expirationDate: $expirationDate
       isPrivate: $isPrivate
     ) {
       errors
@@ -60,9 +58,6 @@ function AddVideo() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    const expirationDate = new Date();
-    expirationDate.setDate(expirationDate.getDate() + 10);
-    const expirationDateInt = Math.floor(expirationDate.getTime() / 1000);
 
     try {
       await createPost({
@@ -70,7 +65,6 @@ function AddVideo() {
           title: title,
           description: description,
           videoUrl: videoUrl,
-          expirationDate: expirationDateInt,
           isPrivate: isPrivate,
         },
       });
