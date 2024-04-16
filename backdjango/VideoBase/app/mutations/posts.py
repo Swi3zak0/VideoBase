@@ -6,7 +6,6 @@ from django.utils import timezone
 import base64
 import jwt
 
-
 class CreatePostMutation(graphene.Mutation):
     class Arguments:
         title = graphene.String(required=True)
@@ -34,10 +33,9 @@ class CreatePostMutation(graphene.Mutation):
 
             if "JWT" in info.context.COOKIES:
                 jwt_token = info.context.COOKIES["JWT"]
-
+                
                 try:
-                    payload = jwt.decode(
-                        jwt_token, "verification_token", algorithms=["HS256"])
+                    payload = jwt.decode(jwt_token, "verification_token", algorithms=["HS256"])
                     username = payload["username"]
                     user = CustomUser.objects.get(username=username)
                 except jwt.ExpiredSignatureError:
@@ -87,18 +85,17 @@ class LikePostMutation(graphene.Mutation):
     def mutate(self, info, post_id):
 
         if "JWT" in info.context.COOKIES:
-            jwt_token = info.context.COOKIES["JWT"]
-
-            try:
-                user = None
-                payload = jwt.decode(
-                    jwt_token, "verification_token", algorithms=["HS256"])
-                username = payload["username"]
-                user = CustomUser.objects.get(username=username)
-            except jwt.ExpiredSignatureError:
-                raise Exception("JWT token has expired")
-            except jwt.InvalidTokenError:
-                raise Exception("Invalid JWT token")
+                jwt_token = info.context.COOKIES["JWT"]
+                
+                try:
+                    user = None
+                    payload = jwt.decode(jwt_token, "verification_token", algorithms=["HS256"])
+                    username = payload["username"]
+                    user = CustomUser.objects.get(username=username)
+                except jwt.ExpiredSignatureError:
+                    raise Exception("JWT token has expired")
+                except jwt.InvalidTokenError:
+                    raise Exception("Invalid JWT token")
 
         if not user.is_authenticated:
             raise Exception('Musisz być zalogowany, aby polubić post.')
@@ -123,7 +120,7 @@ class LikePostMutation(graphene.Mutation):
 
         return LikePostMutation(likes=likes, dislikes=dislikes, success=success)
 
-
+    
 class DislikePostMutation(graphene.Mutation):
     class Arguments:
         post_id = graphene.ID(required=True)
@@ -133,20 +130,19 @@ class DislikePostMutation(graphene.Mutation):
     success = graphene.Boolean()
 
     def mutate(self, info, post_id):
-
+         
         if "JWT" in info.context.COOKIES:
-            jwt_token = info.context.COOKIES["JWT"]
-
-            try:
-                user = None
-                payload = jwt.decode(
-                    jwt_token, "verification_token", algorithms=["HS256"])
-                username = payload["username"]
-                user = CustomUser.objects.get(username=username)
-            except jwt.ExpiredSignatureError:
-                raise Exception("JWT token has expired")
-            except jwt.InvalidTokenError:
-                raise Exception("Invalid JWT token")
+                jwt_token = info.context.COOKIES["JWT"]
+                
+                try:
+                    user = None
+                    payload = jwt.decode(jwt_token, "verification_token", algorithms=["HS256"])
+                    username = payload["username"]
+                    user = CustomUser.objects.get(username=username)
+                except jwt.ExpiredSignatureError:
+                    raise Exception("JWT token has expired")
+                except jwt.InvalidTokenError:
+                    raise Exception("Invalid JWT token")
 
         if not user.is_authenticated:
             raise Exception('Musisz być zalogowany, aby polubić post.')
@@ -169,3 +165,4 @@ class DislikePostMutation(graphene.Mutation):
         post.save()
 
         return DislikePostMutation(likes=likes, dislikes=dislikes, success=success)
+    

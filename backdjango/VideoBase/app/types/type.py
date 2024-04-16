@@ -29,11 +29,9 @@ class PostType(DjangoObjectType):
         model = Post
         fields = "__all__"
 
-
 class LikesInfo(graphene.ObjectType):
     likes = graphene.Int()
     dislikes = graphene.Int()
-
 
 class CommentType(DjangoObjectType):
     class Meta:

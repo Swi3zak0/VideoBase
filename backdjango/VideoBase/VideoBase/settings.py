@@ -52,6 +52,7 @@ DEBUG = True
 ALLOWED_HOSTS = []
 
 
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -68,6 +69,8 @@ INSTALLED_APPS = [
     'rest_framework'
 
 ]
+
+
 
 
 MIDDLEWARE = [
@@ -94,7 +97,7 @@ AUTH_USER_MODEL = 'app.CustomUser'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.jinja2.Jinja2',
-        'DIRS': [BASE_DIR / 'templates'],
+        'DIRS': [BASE_DIR / 'templates'], 
         'APP_DIRS': True,
         'OPTIONS': {
             'environment': 'app.jinja2.environment',
@@ -128,9 +131,9 @@ DATABASES = {
         'USER': 'xxjwbmhq',
         'PASSWORD': 'Ooj1m0HCn5U7RRbwocfYJrWYZh3CSZQs',
         'HOST': 'cornelius.db.elephantsql.com',
-        'PORT': '5432',
+        'PORT': '5432', 
     }
-}
+} 
 
 
 # Password validation
