@@ -16,7 +16,7 @@ from graphql_jwt.decorators import login_required
 from .models import Video as VideoModel
 from .models import Post as PostModel
 from .models import Comment as CommentModel
-from .mutations.posts import CreatePostMutation, DislikePostMutation, LikePostMutation, checkLikesMutation
+from .mutations.posts import CreatePostMutation, DislikePostMutation, LikePostMutation
 from .mutations.comments import CreateCommentMutation
 
 # from .mutations.videos import CreateVideoMutation
@@ -72,6 +72,8 @@ class Query(graphene.ObjectType):
         likes = post.likes.count()
         dislikes = post.dislikes.count()
         return [LikesInfo(likes=likes, dislikes=dislikes)]
+    
+    
 
     def resolve_post_comments(self, info, post_id):
         try:

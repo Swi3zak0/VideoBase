@@ -26,7 +26,8 @@ class CreatePostMutation(graphene.Mutation):
         video_url,
         is_private,
         expiration_date=None,
-    ):
+        ):
+
         try:
             user = None
 
@@ -112,7 +113,10 @@ class LikePostMutation(graphene.Mutation):
 
         success = True
         likes = post.likes.count()
-        dislikes = post.likes.count()
+        post.likes_count=likes
+        dislikes = post.dislikes.count()
+        post.dislikes_count=dislikes
+        post.save()
 
         return LikePostMutation(likes=likes, dislikes=dislikes, success=success)
 
@@ -155,7 +159,10 @@ class DislikePostMutation(graphene.Mutation):
 
         success = True
         likes = post.likes.count()
-        dislikes = post.likes.count()
+        post.likes_count=likes
+        dislikes = post.dislikes.count()
+        post.dislikes_count=dislikes
+        post.save()
 
         return DislikePostMutation(likes=likes, dislikes=dislikes, success=success)
     
