@@ -18,6 +18,8 @@ import { BiSolidLike, BiSolidDislike } from "react-icons/bi";
 const POST_QUERY = gql`
   query MyQuery {
     allPosts {
+      isLiked
+      isDisliked
       dislikesCount
       likesCount
       shortUrl
@@ -90,60 +92,32 @@ function Home() {
     if (data && data.allPosts) {
       const initialInteractions = data.allPosts.reduce((acc, post) => {
         acc[post.id] = {
-          liked: false,
-          disliked: false,
+          liked: post.isLiked,
+          disliked: post.isDisliked,
           likes: post.likesCount,
-          dislikes: post.dislikeCount,
+          dislikes: post.dislikesCount,
         };
         return acc;
       }, {});
       setPostInteractions(initialInteractions);
     }
-  }, [data, location.search]);
+  }, [data]);
 
   const handleLike = (postId) => {
-    const post = postInteractions[postId];
-    const currentlyLiked = post.liked;
-    const newLikesCount = currentlyLiked ? post.likes - 1 : post.likes + 1;
-
     likePost({ variables: { postId } })
       .then((response) => {
         if (response.data.likePost.success) {
-          setPostInteractions((current) => ({
-            ...current,
-            [postId]: {
-              ...current[postId],
-              liked: !currentlyLiked,
-              disliked: false,
-              dislikes: response.data.likePost.dislikes,
-              likes: newLikesCount,
-            },
-          }));
+          refetch();
         }
       })
       .catch((error) => console.error("Error processing like:", error));
   };
 
   const handleDislike = (postId) => {
-    const post = postInteractions[postId];
-    const currentlyDisliked = post.disliked;
-    const newDislikesCount = currentlyDisliked
-      ? post.dislikes - 1
-      : post.dislikes + 1;
-
     dislikePost({ variables: { postId } })
       .then((response) => {
         if (response.data.dislikePost.success) {
-          setPostInteractions((current) => ({
-            ...current,
-            [postId]: {
-              ...current[postId],
-              disliked: !currentlyDisliked,
-              liked: false,
-              likes: response.data.dislikePost.likes,
-              dislikes: newDislikesCount,
-            },
-          }));
+          refetch();
         }
       })
       .catch((error) => console.error("Error processing dislike:", error));
@@ -215,7 +189,9 @@ function Home() {
                         style={{ width: "100%" }}
                       />
                     </div>
-                    <CardText>{post.description}</CardText>
+                    <CardText>
+                      {post.description} {post.id}
+                    </CardText>
                   </Card.Body>
                   <div>
                     <ButtonGroup className="m-2">
