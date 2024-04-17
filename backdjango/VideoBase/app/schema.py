@@ -18,9 +18,11 @@ from .models import Post as PostModel
 from .models import Comment as CommentModel
 from .mutations.posts import CreatePostMutation, DislikePostMutation, LikePostMutation
 from .mutations.comments import CreateCommentMutation
-
+from django.contrib.auth import get_user
 # from .mutations.videos import CreateVideoMutation
 # , UpdateVideoMutation, DeleteVideoMutation
+import jwt
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class Query(graphene.ObjectType):
@@ -65,7 +67,32 @@ class Query(graphene.ObjectType):
         return queryset
     
     def resolve_all_posts(self, info):
-        return PostModel.objects.all()
+        user = None
+
+        if "JWT" in info.context.COOKIES:
+            jwt_token = info.context.COOKIES["JWT"]
+            
+            try:
+                payload = jwt.decode(jwt_token, "verification_token", algorithms=["HS256"])
+                username = payload["username"]
+                try:
+                    user = CustomUser.objects.get(username=username)
+                except ObjectDoesNotExist:
+                    # Obsłuż sytuację, gdy użytkownik nie istnieje w bazie danych
+                    raise Exception("User does not exist")
+            except jwt.ExpiredSignatureError:
+                raise Exception("JWT token has expired")
+            except jwt.InvalidTokenError:
+                raise Exception("Invalid JWT token")
+
+        posts = PostModel.objects.all()
+
+        for post in posts:
+            post.is_liked = user in post.likes.all() if user else False
+            post.is_disliked = user in post.dislikes.all() if user else False
+
+        return posts
+
     
     def resolve_check_likes(self, info, post_id=None):
         post = PostModel.objects.get(id=post_id)

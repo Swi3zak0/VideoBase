@@ -25,6 +25,9 @@ class VideoType(DjangoObjectType):
 
 
 class PostType(DjangoObjectType):
+    is_liked = graphene.Boolean()
+    is_disliked = graphene.Boolean()
+
     class Meta:
         model = Post
         fields = "__all__"
