@@ -9,14 +9,26 @@
   background-color: #3d3d3d;
   color: #fff;
   border-radius: 8px;
-  padding: 10px;
+  padding: 15px;
 }
 
 .card-text {
   padding: 10px;
 }
+.custom-card {
+  width: 100%;
+  border: none;
+  margin-top: auto;
+  padding: 10px;
+}
+.custom-card h3 {
+  padding: 10px;
+  border-bottom: 2px solid black;
+}
 .custom-card-header {
   padding: 10px;
+  font-size: large;
+  font-weight: bold;
 }
 
 .custom-card-title {

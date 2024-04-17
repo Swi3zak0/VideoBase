@@ -130,6 +130,9 @@ function Home() {
         videoUrl: post.video.url,
         videoTitle: post.title,
         videoDescription: post.description,
+        likes: post.isLiked,
+        disLikes: post.isDisliked,
+        postId: post.id,
         uploaderName: post.user
           ? post.user.username
           : "Niezalogowany użytkownik",
