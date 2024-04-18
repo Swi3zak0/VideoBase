@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, gql } from "@apollo/client";
+import debounce from "lodash.debounce";
 import {
   CardHeader,
   Container,
@@ -12,7 +13,7 @@ import {
   ButtonGroup,
   CardText,
 } from "react-bootstrap";
-import { FaRegCommentDots, FaEye, FaLeaf } from "react-icons/fa";
+import { FaRegCommentDots, FaEye } from "react-icons/fa";
 import { BiSolidLike, BiSolidDislike } from "react-icons/bi";
 
 const POST_QUERY = gql`
@@ -65,11 +66,66 @@ function Home() {
   const navigate = useNavigate();
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const { data, refetch } = useQuery(POST_QUERY);
+  const { data } = useQuery(POST_QUERY);
   const [postInteractions, setPostInteractions] = useState({});
 
-  const [likePost] = useMutation(LIKE_POST);
-  const [dislikePost] = useMutation(DISLIKE_POST);
+  const [likePost] = useMutation(LIKE_POST, {
+    update(cache, { data: { likePost } }) {
+      if (likePost.success) {
+        const existingPost = cache.readQuery({
+          query: POST_QUERY,
+          variables: { postId: likePost.postId },
+        });
+
+        const updatedPosts = existingPost.allPosts.map((post) => {
+          if (post.id === likePost.postId) {
+            return {
+              ...post,
+              likesCount: likePost.likes,
+              isLiked: true,
+              isDisliked: false,
+            };
+          } else {
+            return post;
+          }
+        });
+
+        cache.writeQuery({
+          query: POST_QUERY,
+          data: { allPosts: updatedPosts },
+        });
+      }
+    },
+  });
+
+  const [dislikePost] = useMutation(DISLIKE_POST, {
+    update(cache, { data: { dislikePost } }) {
+      if (dislikePost.success) {
+        const existingPost = cache.readQuery({
+          query: POST_QUERY,
+          variables: { postId: dislikePost.postId },
+        });
+
+        const updatedPosts = existingPost.allPosts.map((post) => {
+          if (post.id === dislikePost.postId) {
+            return {
+              ...post,
+              dislikesCount: dislikePost.dislikes,
+              isDisliked: true,
+              isLiked: false,
+            };
+          } else {
+            return post;
+          }
+        });
+
+        cache.writeQuery({
+          query: POST_QUERY,
+          data: { allPosts: updatedPosts },
+        });
+      }
+    },
+  });
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
@@ -101,27 +157,127 @@ function Home() {
       }, {});
       setPostInteractions(initialInteractions);
     }
-  }, [data]);
+  }, [data, location.search]);
 
-  const handleLike = (postId) => {
-    likePost({ variables: { postId } })
-      .then((response) => {
-        if (response.data.likePost.success) {
-          refetch();
+  const handleLike = useCallback(
+    debounce((postId) => {
+      setPostInteractions((currentInteractions) => {
+        if (!currentInteractions[postId]) {
+          return currentInteractions;
         }
-      })
-      .catch((error) => console.error("Error processing like:", error));
-  };
 
-  const handleDislike = (postId) => {
-    dislikePost({ variables: { postId } })
-      .then((response) => {
-        if (response.data.dislikePost.success) {
-          refetch();
+        const updatedLikes = currentInteractions[postId].liked
+          ? currentInteractions[postId].likes - 1
+          : currentInteractions[postId].likes + 1;
+        const updatedDislikes = currentInteractions[postId].disliked
+          ? currentInteractions[postId].dislikes - 1
+          : currentInteractions[postId].dislikes;
+
+        likePost({
+          variables: { postId },
+          optimisticResponse: {
+            __typename: "Mutation",
+            likePost: {
+              __typename: "LikePostResponse",
+              likes: updatedLikes,
+              dislikes: updatedDislikes,
+              success: true,
+              postId: postId,
+            },
+          },
+        }).catch(() => {
+          setPostInteractions((current) => {
+            if (!current[postId]) return current;
+
+            return {
+              ...current,
+              [postId]: {
+                ...current[postId],
+                liked: current[postId].liked,
+                dislikes: current[postId].disliked
+                  ? current[postId].dislikes + 1
+                  : current[postId].dislikes - 1,
+                likes: current[postId].liked
+                  ? current[postId].likes + 1
+                  : current[postId].likes - 1,
+              },
+            };
+          });
+        });
+        return {
+          ...currentInteractions,
+          [postId]: {
+            ...currentInteractions[postId],
+            liked: !currentInteractions[postId].liked,
+            disliked: false,
+            likes: updatedLikes,
+            dislikes: updatedDislikes,
+          },
+        };
+      });
+    }, 500),
+    [likePost]
+  );
+
+  const handleDislike = useCallback(
+    debounce((postId) => {
+      setPostInteractions((currentInteractions) => {
+        if (!currentInteractions[postId]) {
+          return currentInteractions;
         }
-      })
-      .catch((error) => console.error("Error processing dislike:", error));
-  };
+
+        const updatedLikes = currentInteractions[postId].liked
+          ? currentInteractions[postId].likes - 1
+          : currentInteractions[postId].likes;
+        const updatedDislikes = currentInteractions[postId].disliked
+          ? currentInteractions[postId].dislikes - 1
+          : currentInteractions[postId].dislikes + 1;
+
+        dislikePost({
+          variables: { postId },
+          optimisticResponse: {
+            __typename: "Mutation",
+            dislikePost: {
+              __typename: "DislikePostResponse",
+              dislikes: updatedDislikes,
+              likes: updatedLikes,
+              success: true,
+              postId: postId,
+            },
+          },
+        }).catch(() => {
+          setPostInteractions((current) => {
+            if (!current[postId]) return current;
+
+            return {
+              ...current,
+              [postId]: {
+                ...current[postId],
+                disliked: current[postId].disliked,
+                dislikes: current[postId].disliked
+                  ? current[postId].dislikes - 1
+                  : current[postId].dislikes + 1,
+                likes: current[postId].liked
+                  ? current[postId].likes + 1
+                  : current[postId].likes - 1,
+              },
+            };
+          });
+        });
+        return {
+          ...currentInteractions,
+          [postId]: {
+            ...currentInteractions[postId],
+            disliked: !currentInteractions[postId].disliked,
+            liked: false,
+            likes: updatedLikes,
+            dislikes: updatedDislikes,
+          },
+        };
+      });
+    }, 500),
+    [dislikePost]
+  );
 
   const redirectToVideo = (post, event) => {
     event.preventDefault();
