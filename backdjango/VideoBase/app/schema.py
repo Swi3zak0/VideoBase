@@ -11,14 +11,15 @@ from graphql_jwt.decorators import login_required
 from .models import Video as VideoModel
 from .models import Post as PostModel
 from .mutations.posts import CreatePostMutation, DislikePostMutation, LikePostMutation
-from .types.type import VideoType, PostType, CommentType
+from .types.type import VideoType, PostType, CommentType, SubCommentType
 from graphql_jwt.decorators import login_required
 from .models import Video as VideoModel
 from .models import Post as PostModel
 from .models import Comment as CommentModel
+from .models import SubComment as SubCommentModel
 from .mutations.posts import CreatePostMutation, DislikePostMutation, LikePostMutation
 from .mutations.comments import CreateCommentMutation
-from django.contrib.auth import get_user
+from .mutations.subcomments import CreateSubCommentMutation
 # from .mutations.videos import CreateVideoMutation
 # , UpdateVideoMutation, DeleteVideoMutation
 import jwt
@@ -33,6 +34,9 @@ class Query(graphene.ObjectType):
     search_post = graphene.List(PostType, search=graphene.String(), category=graphene.String())
     check_likes = graphene.List(LikesInfo, post_id=graphene.Int())
     post_comments = graphene.List(CommentType, post_id=graphene.ID(required=True))
+    all_subcomments = graphene.List(SubCommentType, post_id=graphene.ID(required=True))
+
+
 
     @login_required
     def resolve_all_videos(self, info):
@@ -78,14 +82,13 @@ class Query(graphene.ObjectType):
                 try:
                     user = CustomUser.objects.get(username=username)
                 except ObjectDoesNotExist:
-                    # Obsłuż sytuację, gdy użytkownik nie istnieje w bazie danych
                     raise Exception("User does not exist")
             except jwt.ExpiredSignatureError:
                 raise Exception("JWT token has expired")
             except jwt.InvalidTokenError:
                 raise Exception("Invalid JWT token")
 
-        posts = PostModel.objects.all()
+        posts = PostModel.objects.all().order_by('id')
 
         for post in posts:
             post.is_liked = user in post.likes.all() if user else False
@@ -108,6 +111,11 @@ class Query(graphene.ObjectType):
             return CommentModel.objects.filter(post=post)
         except PostModel.DoesNotExist:
             return []
+        
+
+    def resolve_all_subcomments(self, info, post_id):
+        return SubCommentModel.objects.filter(comment__post_id=post_id)
+    
 
 class Mutation(graphene.ObjectType):
     verify_token = graphql_jwt.Verify.Field()
@@ -125,6 +133,7 @@ class Mutation(graphene.ObjectType):
     dislike_post = DislikePostMutation.Field()
 
     create_coment = CreateCommentMutation.Field()
+    create_subcoment = CreateSubCommentMutation.Field()
 
 
     # create_video = CreateVideoMutation.Field()

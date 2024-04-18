@@ -68,3 +68,12 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"Comment by {self.user.username} on {self.post.title}"
+    
+
+class SubComment(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
+    sub_comment = models.TextField()
+
+    def __str__(self):
+        return f"Subcomment by {self.user.username} on {self.comment.post.title} - {self.comment.comment}"
