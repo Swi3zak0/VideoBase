@@ -5,6 +5,7 @@ from ..types.type import SubCommentType
 from django.utils import timezone
 import base64
 import jwt
+from ..jwt_auth import jwt_get_user
 
 
 class CreateSubCommentMutation(graphene.Mutation):
@@ -17,20 +18,7 @@ class CreateSubCommentMutation(graphene.Mutation):
 
     def mutate(self, info, comment_id, sub_comment):
         try:
-            user = None
-
-            if "JWT" in info.context.COOKIES:
-                jwt_token = info.context.COOKIES["JWT"]
-
-                try:
-                    payload = jwt.decode(
-                        jwt_token, "verification_token", algorithms=["HS256"])
-                    username = payload["username"]
-                    user = CustomUser.objects.get(username=username)
-                except jwt.ExpiredSignatureError:
-                    raise Exception("JWT token has expired")
-                except jwt.InvalidTokenError:
-                    raise Exception("Invalid JWT token")
+            user = jwt_get_user(info)
 
             if not user:
                 raise Exception("User not authenticated")

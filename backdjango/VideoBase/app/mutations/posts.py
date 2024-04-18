@@ -5,6 +5,7 @@ from ..types.type import PostType
 from django.utils import timezone
 import base64
 import jwt
+from ..jwt_auth import jwt_get_user
 
 
 class CreatePostMutation(graphene.Mutation):
@@ -30,20 +31,7 @@ class CreatePostMutation(graphene.Mutation):
     ):
 
         try:
-            user = None
-
-            if "JWT" in info.context.COOKIES:
-                jwt_token = info.context.COOKIES["JWT"]
-
-                try:
-                    payload = jwt.decode(
-                        jwt_token, "verification_token", algorithms=["HS256"])
-                    username = payload["username"]
-                    user = CustomUser.objects.get(username=username)
-                except jwt.ExpiredSignatureError:
-                    raise Exception("JWT token has expired")
-                except jwt.InvalidTokenError:
-                    raise Exception("Invalid JWT token")
+            user = jwt_get_user(info)
 
             exp_date = None
             if is_private:
@@ -86,19 +74,7 @@ class LikePostMutation(graphene.Mutation):
 
     def mutate(self, info, post_id):
 
-        if "JWT" in info.context.COOKIES:
-            jwt_token = info.context.COOKIES["JWT"]
-
-            try:
-                user = None
-                payload = jwt.decode(
-                    jwt_token, "verification_token", algorithms=["HS256"])
-                username = payload["username"]
-                user = CustomUser.objects.get(username=username)
-            except jwt.ExpiredSignatureError:
-                raise Exception("JWT token has expired")
-            except jwt.InvalidTokenError:
-                raise Exception("Invalid JWT token")
+        user = jwt_get_user(info)
 
         if not user.is_authenticated:
             raise Exception('Musisz być zalogowany, aby polubić post.')
@@ -134,19 +110,7 @@ class DislikePostMutation(graphene.Mutation):
 
     def mutate(self, info, post_id):
 
-        if "JWT" in info.context.COOKIES:
-            jwt_token = info.context.COOKIES["JWT"]
-
-            try:
-                user = None
-                payload = jwt.decode(
-                    jwt_token, "verification_token", algorithms=["HS256"])
-                username = payload["username"]
-                user = CustomUser.objects.get(username=username)
-            except jwt.ExpiredSignatureError:
-                raise Exception("JWT token has expired")
-            except jwt.InvalidTokenError:
-                raise Exception("Invalid JWT token")
+        user = jwt_get_user(info)
 
         if not user.is_authenticated:
             raise Exception('Musisz być zalogowany, aby polubić post.')
