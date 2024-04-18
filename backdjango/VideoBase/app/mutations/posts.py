@@ -83,6 +83,8 @@ class LikePostMutation(graphene.Mutation):
         if post.dislikes.filter(username=user.username):
             post.dislikes.remove(user)
             post.likes.add(user)
+        elif post.likes.filter(username=user.username):
+            post.likes.remove(user)
         else:
             post.likes.add(user)
 
@@ -116,8 +118,12 @@ class DislikePostMutation(graphene.Mutation):
         if post.likes.filter(username=user.username):
             post.likes.remove(user)
             post.dislikes.add(user)
+        elif post.dislikes.filter(username=user.username):
+            post.dislikes.remove(user)
         else:
             post.dislikes.add(user)
+        
+
 
         success = True
         likes = post.likes.count()
