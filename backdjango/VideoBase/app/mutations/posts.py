@@ -68,8 +68,6 @@ class LikePostMutation(graphene.Mutation):
     class Arguments:
         post_id = graphene.ID(required=True)
 
-    dislikes = graphene.Int()
-    likes = graphene.Int()
     success = graphene.Boolean()
 
     def mutate(self, info, post_id):
@@ -82,13 +80,12 @@ class LikePostMutation(graphene.Mutation):
             post = Post.objects.get(id=post_id)
         except Post.DoesNotExist:
             raise Exception('Post o podanym ID nie istnieje.')
-        if post.dislikes.contains(user):
+        if post.dislikes.filter(username=user.username):
             post.dislikes.remove(user)
-
-        if post.likes.contains(user):
-            post.likes.remove(user)
+            post.likes.add(user)
         else:
             post.likes.add(user)
+
 
         success = True
         likes = post.likes.count()
@@ -97,15 +94,13 @@ class LikePostMutation(graphene.Mutation):
         post.dislikes_count = dislikes
         post.save()
 
-        return LikePostMutation(likes=likes, dislikes=dislikes, success=success)
+        return LikePostMutation(success=success)
 
 
 class DislikePostMutation(graphene.Mutation):
     class Arguments:
         post_id = graphene.ID(required=True)
 
-    likes = graphene.Int()
-    dislikes = graphene.Int()
     success = graphene.Boolean()
 
     def mutate(self, info, post_id):
@@ -118,10 +113,9 @@ class DislikePostMutation(graphene.Mutation):
             post = Post.objects.get(id=post_id)
         except Post.DoesNotExist:
             raise Exception('Post o podanym ID nie istnieje.')
-        if post.likes.contains(user):
+        if post.likes.filter(username=user.username):
             post.likes.remove(user)
-        if post.dislikes.contains(user):
-            post.dislikes.remove(user)
+            post.dislikes.add(user)
         else:
             post.dislikes.add(user)
 
@@ -132,4 +126,4 @@ class DislikePostMutation(graphene.Mutation):
         post.dislikes_count = dislikes
         post.save()
 
-        return DislikePostMutation(likes=likes, dislikes=dislikes, success=success)
+        return DislikePostMutation(success=success)
