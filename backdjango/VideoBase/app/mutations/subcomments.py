@@ -21,9 +21,10 @@ class CreateSubCommentMutation(graphene.Mutation):
 
             if "JWT" in info.context.COOKIES:
                 jwt_token = info.context.COOKIES["JWT"]
-                
+
                 try:
-                    payload = jwt.decode(jwt_token, "verification_token", algorithms=["HS256"])
+                    payload = jwt.decode(
+                        jwt_token, "verification_token", algorithms=["HS256"])
                     username = payload["username"]
                     user = CustomUser.objects.get(username=username)
                 except jwt.ExpiredSignatureError:

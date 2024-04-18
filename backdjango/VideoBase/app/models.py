@@ -52,14 +52,16 @@ class Post(models.Model):
     # expirated = models.BooleanField(default=False)
     # views = models.IntegerField(default=0)
     # category = models.ForeignKey(Category, null=True, on_delete=models.CASCADE)
-    likes = models.ManyToManyField(CustomUser, related_name="likes", blank=True)
-    dislikes = models.ManyToManyField(CustomUser, related_name="dislikes", blank=True)
+    likes = models.ManyToManyField(
+        CustomUser, related_name="likes", blank=True)
+    dislikes = models.ManyToManyField(
+        CustomUser, related_name="dislikes", blank=True)
     likes_count = models.IntegerField(default=0)
     dislikes_count = models.IntegerField(default=0)
 
     def __str__(self):
         return f"{self.title}"
-    
+
 
 class Comment(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
@@ -68,7 +70,7 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"Comment by {self.user.username} on {self.post.title}"
-    
+
 
 class SubComment(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
