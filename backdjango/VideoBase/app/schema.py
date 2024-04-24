@@ -39,6 +39,10 @@ class Query(graphene.ObjectType):
         CommentType, post_id=graphene.ID(required=True))
     all_subcomments = graphene.List(
         SubCommentType, post_id=graphene.ID(required=True))
+    post_by_id = graphene.Field(
+        PostType,
+        post_id=graphene.ID(required=True)
+    )
 
     @login_required
     def resolve_all_videos(self, info):
@@ -98,6 +102,14 @@ class Query(graphene.ObjectType):
 
     def resolve_all_subcomments(self, info, post_id):
         return SubCommentModel.objects.filter(comment__post_id=post_id)
+
+    
+    def resolve_post_by_id(self, info, post_id):
+        try:
+            post = PostModel.objects.get(id=post_id)
+            return post
+        except ObjectDoesNotExist:
+            return None
 
 
 class Mutation(graphene.ObjectType):
