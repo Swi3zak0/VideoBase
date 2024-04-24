@@ -40,7 +40,20 @@ function SearchScreen() {
       },
     });
   };
-
+  if (!data || !data.searchPost || data.searchPost.length === 0) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          margin: "50px",
+          fontSize: "40px",
+          borderBottom: "2px solid black",
+        }}
+      >
+        No videos found for: "{keywords}"
+      </div>
+    );
+  }
   return (
     <div>
       {data &&

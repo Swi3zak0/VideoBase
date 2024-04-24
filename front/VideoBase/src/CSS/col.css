@@ -2,6 +2,8 @@
   border-radius: 8px;
   border: none;
   box-shadow: 10px 10px 20px 5px rgba(0, 0, 0, 0.5);
-  padding: 20px;
-  margin: 30px;
+}
+.custom-col {
+  left: 0;
+  max-width: 100px;
 }

@@ -7,15 +7,17 @@ import {
   ButtonGroup,
   Button,
   CardText,
-  FormLabel,
-  FormText,
   Form,
+  FormGroup,
+  FormControl,
 } from "react-bootstrap";
-import { useParams, useLocation } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { BiSolidLike, BiSolidDislike } from "react-icons/bi";
-import { FaRegCommentDots, FaEye } from "react-icons/fa";
-import { useState } from "react";
+import { FaEye } from "react-icons/fa";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, gql } from "@apollo/client";
+import usePostInteractions from "./PostInteractions";
+import { MdOutlineQuestionAnswer } from "react-icons/md";
 
 const COMMENT_QUERY = gql`
   query MyQuery($postId: ID!) {
@@ -25,6 +27,16 @@ const COMMENT_QUERY = gql`
       user {
         username
       }
+    }
+    postById(postId: $postId) {
+      isDisliked
+      isLiked
+      likesCount
+      dislikesCount
+    }
+    allSubcomments(postId: $postId) {
+      subComment
+      id
     }
   }
 `;
@@ -38,23 +50,26 @@ const COMMENT_MUTATION = gql`
   }
 `;
 
+const SUBCOMMENT_MUTATION = gql`
+  mutation MyMutation($commentId: ID!, $subComment: String!) {
+    createSubcoment(commentId: $commentId, subComment: $subComment) {
+      errors
+      success
+    }
+  }
+`;
+
 function VideoPost() {
   const location = useLocation();
   const videoUrl = location.state?.videoUrl;
   const videoTitle = location.state?.videoTitle;
   const username = location.state?.uploaderName;
   const videoDescription = location.state?.videoDescription;
-  const likes = location.state?.likes;
-  const dislikes = location.state?.dislikes;
   const postId = location.state?.postId;
 
-  const [liked, setLiked] = useState(false);
-  const [disliked, setDisliked] = useState(false);
+  const [createSubcomment] = useMutation(SUBCOMMENT_MUTATION);
 
-  const [replyBox, setReplyBox] = useState({ open: false, commentId: null });
-  const [comment, setComment] = useState("");
-
-  const { data } = useQuery(COMMENT_QUERY, {
+  const { data, loading, refetch } = useQuery(COMMENT_QUERY, {
     variables: { postId: postId },
   });
 
@@ -75,53 +90,103 @@ function VideoPost() {
     },
   });
 
-  const handleReplyClick = (commentId) => {
-    setReplyBox({ open: !replyBox.open, commentId });
-  };
+  const { handleLike, handleDislike } = usePostInteractions(refetch);
+  const [replyBox, setReplyBox] = useState({ open: false, commentId: null });
+  const [checkReplaysBox, setCheckReplaysBox] = useState({
+    open: false,
+    commentId: null,
+  });
+
+  const [subComment, setSubcomment] = useState("");
+  const [comment, setComment] = useState("");
+  const [postInteractions, setPostInteractions] = useState({});
+
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
+
+  useEffect(() => {
+    if (!loading && !initialLoadComplete) {
+      setInitialLoadComplete(true);
+    }
+  }, [loading, initialLoadComplete]);
 
   const handleCommentSubmit = async () => {
     if (comment.trim() !== "") {
-      try {
-        const response = await createComment({
-          variables: {
-            comment: comment,
-            postId: postId,
-          },
-        });
-        setComment("");
-      } catch (error) {}
+      await createComment({
+        variables: {
+          comment: comment,
+          postId: postId,
+        },
+      });
+      setComment("");
     }
   };
 
-  const renderReplyBox = (commentId) => {
-    if (replyBox.open && replyBox.commentId === commentId) {
+  const handleSubcommentSubmit = async (commentId) => {
+    if (subComment.trim() !== "") {
+      await createSubcomment({
+        variables: {
+          commentId: commentId,
+          subComment: subComment,
+        },
+      });
+      setSubcomment("");
+    }
+  };
+  console.log(data);
+  const handleCheckReplaysClick = (commentId) => {
+    setCheckReplaysBox((prev) => ({
+      open: !prev.open,
+      commentId: commentId === prev.commentId ? null : commentId,
+    }));
+  };
+
+  const renderCheckReplyBox = (commentId) => {
+    if (checkReplaysBox.open && checkReplaysBox.commentId === commentId) {
       return (
         <div>
-          <textarea
-            className="comment-replay"
-            placeholder="Dodaj odpowiedź..."
-          ></textarea>
-          <Button variant="light">Dodaj odpowiedź</Button>
+          {data &&
+            data.allSubcomments.map((subcomment) => (
+              <div key={subcomment.id} className="custom-card-text">
+                {subcomment.subComment}
+              </div>
+            ))}
         </div>
       );
     }
     return null;
   };
 
-  const handleLike = () => {
-    setLiked(!liked);
-    if (disliked) {
-      setDisliked(false);
-    }
+  const handleReplyClick = (commentId) => {
+    setReplyBox((prev) => ({
+      open: !prev.open,
+      commentId: commentId === prev.commentId ? null : commentId,
+    }));
   };
 
-  const handleDislike = () => {
-    setDisliked(!disliked);
-    if (liked) {
-      setLiked(false);
+  const renderReplyBox = (commentId) => {
+    if (replyBox.open && replyBox.commentId === commentId) {
+      return (
+        <Form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSubcommentSubmit(commentId);
+          }}
+        >
+          <FormGroup>
+            <FormControl
+              value={subComment}
+              onChange={(e) => setSubcomment(e.target.value)}
+              placeholder="Add a reply..."
+            />
+            <Button variant="light" type="submit">
+              Dodaj odpowiedź
+            </Button>
+          </FormGroup>
+        </Form>
+      );
     }
+    return null;
   };
-
   return (
     <Container fluid>
       <Row>
@@ -141,16 +206,26 @@ function VideoPost() {
             </Card.Body>
             <div>
               <ButtonGroup className="m-2">
-                <Button onClick={handleLike} variant="light">
-                  <BiSolidLike style={{ color: liked ? "green" : "#000000" }} />
-                  10
+                <Button onClick={() => handleLike(postId)} variant="light">
+                  <BiSolidLike
+                    style={{
+                      color: postInteractions[postId]?.liked
+                        ? "green"
+                        : "#000000",
+                    }}
+                  />
+                  {data?.postById?.likesCount || 0}
                 </Button>
                 <br />
-                <Button variant="light" onClick={handleDislike}>
+                <Button onClick={() => handleDislike(postId)} variant="light">
                   <BiSolidDislike
-                    style={{ color: disliked ? "red" : "#000000" }}
+                    style={{
+                      color: postInteractions[postId]?.disliked
+                        ? "red"
+                        : "#000000",
+                    }}
                   />
-                  2
+                  {data?.postById?.dislikesCount || 0}
                 </Button>
               </ButtonGroup>
 
@@ -174,7 +249,9 @@ function VideoPost() {
             </div>
             <div className="custom-card">
               <h3>Comments:</h3>
-              {data &&
+              {loading ? (
+                <div>Loading comments...</div>
+              ) : data && data.postComments.length > 0 ? (
                 data.postComments.map((comment) => (
                   <div key={comment.id}>
                     <div className="custom-card-header">
@@ -183,29 +260,27 @@ function VideoPost() {
                     <div className="custom-card-text">{comment.comment}</div>
                     <div>
                       <ButtonGroup>
-                        <Button onClick={handleLike} variant="light">
-                          <BiSolidLike
-                            style={{ color: liked ? "green" : "#000000" }}
-                          />
-                          10
-                        </Button>
-                        <Button variant="light" onClick={handleDislike}>
-                          <BiSolidDislike
-                            style={{ color: disliked ? "red" : "#000000" }}
-                          />
-                          2
-                        </Button>
                         <Button
                           onClick={() => handleReplyClick(comment.id)}
                           variant="light"
                         >
                           Answer
                         </Button>
+                        <Button
+                          onClick={() => handleCheckReplaysClick(comment.id)}
+                          variant="light"
+                        >
+                          <MdOutlineQuestionAnswer />
+                        </Button>
                       </ButtonGroup>
                     </div>
                     {renderReplyBox(comment.id)}
+                    {renderCheckReplyBox(comment.id)}
                   </div>
-                ))}
+                ))
+              ) : (
+                <div>No comments</div>
+              )}
             </div>
           </Card>
         </Col>

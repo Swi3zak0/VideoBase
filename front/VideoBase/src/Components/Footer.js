@@ -3,8 +3,8 @@ import { IoLogoGithub } from "react-icons/io";
 
 function Footer() {
   return (
-    <Card>
-      <CardBody className="footer">
+    <div className="footer">
+      <CardBody>
         2024 &copy; Copyright by MPM{" "}
         <a
           className="footer-link"
@@ -15,7 +15,7 @@ function Footer() {
           <IoLogoGithub />
         </a>
       </CardBody>
-    </Card>
+    </div>
   );
 }
 

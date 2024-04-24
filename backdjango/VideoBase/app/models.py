@@ -6,7 +6,7 @@ from django.db import models
 
 
 class CustomUser(AbstractBaseUser, PermissionsMixin):
-    email = models.EmailField(unique=True)
+    email = models.EmailField(unique=False)
     username = models.CharField(max_length=255, unique=True)
     createdate = models.DateTimeField(auto_now_add=True, blank=True)
     premium = models.BooleanField(default=False)

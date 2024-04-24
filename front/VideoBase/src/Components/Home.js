@@ -63,6 +63,7 @@ function Home() {
   const [errorMessage, setErrorMessage] = useState("");
   const { data, refetch } = useQuery(POST_QUERY);
   const [postInteractions, setPostInteractions] = useState({});
+  const isLoggedIn = localStorage.getItem("isLoggedIn");
 
   const [likePost] = useMutation(LIKE_POST);
   const [dislikePost] = useMutation(DISLIKE_POST);
@@ -152,7 +153,7 @@ function Home() {
       </div>
       <Row>
         <Col md={2}>
-          <Card>
+          <div className="sticky-card">
             <Card.Header>Popular</Card.Header>
             {data &&
               data.allUsers &&
@@ -161,9 +162,9 @@ function Home() {
                   <ListGroup.Item>{user.username}</ListGroup.Item>
                 </ListGroup>
               ))}
-          </Card>
+          </div>
         </Col>
-        <Col md={5} className="offset-md-1">
+        <Col md={6} className="offset-md-1">
           {data &&
             data.allPosts &&
             data.allPosts
@@ -197,6 +198,11 @@ function Home() {
                       <Button
                         onClick={() => handleLike(post.id)}
                         variant="light"
+                        title={
+                          !isLoggedIn
+                            ? "Zaloguj się, aby polubić"
+                            : "Polub ten post"
+                        }
                       >
                         <BiSolidLike
                           style={{
@@ -204,12 +210,17 @@ function Home() {
                               ? "green"
                               : "#000000",
                           }}
-                        />{" "}
-                        {postInteractions[post.id]?.likes || 0}
+                        />
+                        {post.likesCount || 0}
                       </Button>
                       <Button
                         onClick={() => handleDislike(post.id)}
                         variant="light"
+                        title={
+                          !isLoggedIn
+                            ? "Zaloguj się, aby niepolubić"
+                            : "Niepolub ten post"
+                        }
                       >
                         <BiSolidDislike
                           style={{
@@ -217,8 +228,8 @@ function Home() {
                               ? "red"
                               : "#000000",
                           }}
-                        />{" "}
-                        {postInteractions[post.id]?.dislikes || 0}
+                        />
+                        {post.dislikesCount || 0}
                       </Button>
                     </ButtonGroup>
                     <Button
