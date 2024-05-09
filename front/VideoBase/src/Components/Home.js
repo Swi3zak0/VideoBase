@@ -12,8 +12,9 @@ import {
   ButtonGroup,
   CardText,
 } from "react-bootstrap";
-import { FaRegCommentDots, FaEye, FaLeaf } from "react-icons/fa";
+import { FaRegCommentDots, FaEye } from "react-icons/fa";
 import { BiSolidLike, BiSolidDislike } from "react-icons/bi";
+import { IoIosStarOutline } from "react-icons/io";
 
 const POST_QUERY = gql`
   query MyQuery {
@@ -98,7 +99,7 @@ function Home() {
       }, {});
       setPostInteractions(initialInteractions);
     }
-  }, [data]);
+  }, [data, location.search]);
 
   const handleLike = (postId) => {
     likePost({ variables: { postId } })
@@ -154,7 +155,10 @@ function Home() {
       <Row>
         <Col md={2}>
           <div className="sticky-card">
-            <Card.Header>Popular</Card.Header>
+            <Card.Header>
+              Popular
+              <IoIosStarOutline />
+            </Card.Header>
             {data &&
               data.allUsers &&
               data.allUsers.map((user, index) => (

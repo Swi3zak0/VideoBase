@@ -8,6 +8,7 @@ const SEARCH_QUERY = gql`
       createTime
       title
       description
+      id
       user {
         username
       }
@@ -29,11 +30,14 @@ function SearchScreen() {
 
   const redirectToVideo = (post, event) => {
     event.preventDefault();
-    navigate(`/video/${post.video.id}`, {
+    navigate(`/video/${post.id}`, {
       state: {
         videoUrl: post.video.url,
         videoTitle: post.title,
         videoDescription: post.description,
+        likes: post.isLiked,
+        disLikes: post.isDisliked,
+        postId: post.id,
         uploaderName: post.user
           ? post.user.username
           : "Niezalogowany użytkownik",
@@ -54,12 +58,13 @@ function SearchScreen() {
       </div>
     );
   }
+
   return (
     <div>
       {data &&
         data.searchPost &&
         data.searchPost.map((post) => (
-          <div key={post.video.id} className="row mb-4 align-items-stretch ">
+          <div key={post.id} className="row mb-4 align-items-stretch ">
             <div
               className="col-md-3 px-0  cursor-pointer"
               onClick={(e) => redirectToVideo(post, e)}

@@ -18,3 +18,18 @@
 .coments {
   padding: 10px;
 }
+.check-replay-box {
+  width: 100%;
+  padding: 5px;
+}
+.replay-user {
+  font-weight: bold;
+  padding: 5px;
+}
+.subcomments {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-left: 50px;
+  padding: 10px;
+}

@@ -18,6 +18,7 @@ import { useState, useEffect } from "react";
 import { useQuery, useMutation, gql } from "@apollo/client";
 import usePostInteractions from "./PostInteractions";
 import { MdOutlineQuestionAnswer } from "react-icons/md";
+import { FaTurnDown } from "react-icons/fa6";
 
 const COMMENT_QUERY = gql`
   query MyQuery($postId: ID!) {
@@ -37,6 +38,12 @@ const COMMENT_QUERY = gql`
     allSubcomments(postId: $postId) {
       subComment
       id
+      user {
+        username
+      }
+      comment {
+        id
+      }
     }
   }
 `;
@@ -67,7 +74,54 @@ function VideoPost() {
   const videoDescription = location.state?.videoDescription;
   const postId = location.state?.postId;
 
-  const [createSubcomment] = useMutation(SUBCOMMENT_MUTATION);
+  const [createSubcomment] = useMutation(SUBCOMMENT_MUTATION, {
+    update(cache, { data: { createSubcoment } }) {
+      const existingSubcomments = cache.readQuery({
+        query: gql`
+          query GetSubcomments($postId: ID!) {
+            allSubcomments(postId: $postId) {
+              subComment
+              id
+              user {
+                username
+              }
+              comment {
+                id
+              }
+            }
+          }
+        `,
+        variables: { postId: postId },
+      });
+
+      const newSubcomment = createSubcoment;
+      const updatedSubcomments = [
+        ...existingSubcomments.allSubcomments,
+        newSubcomment,
+      ];
+
+      cache.writeQuery({
+        query: gql`
+          query GetSubcomments($postId: ID!) {
+            allSubcomments(postId: $postId) {
+              subComment
+              id
+              user {
+                username
+              }
+              comment {
+                id
+              }
+            }
+          }
+        `,
+        variables: { postId: postId },
+        data: {
+          allSubcomments: updatedSubcomments,
+        },
+      });
+    },
+  });
 
   const { data, loading, refetch } = useQuery(COMMENT_QUERY, {
     variables: { postId: postId },
@@ -99,8 +153,6 @@ function VideoPost() {
 
   const [subComment, setSubcomment] = useState("");
   const [comment, setComment] = useState("");
-  const [postInteractions, setPostInteractions] = useState({});
-
   const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
   useEffect(() => {
@@ -132,7 +184,6 @@ function VideoPost() {
       setSubcomment("");
     }
   };
-  console.log(data);
   const handleCheckReplaysClick = (commentId) => {
     setCheckReplaysBox((prev) => ({
       open: !prev.open,
@@ -143,11 +194,16 @@ function VideoPost() {
   const renderCheckReplyBox = (commentId) => {
     if (checkReplaysBox.open && checkReplaysBox.commentId === commentId) {
       return (
-        <div>
+        <div className="subcomments">
           {data &&
             data.allSubcomments.map((subcomment) => (
-              <div key={subcomment.id} className="custom-card-text">
-                {subcomment.subComment}
+              <div className="subcomment-card">
+                <div key={subcomment.id} className="replay-user">
+                  {subcomment.user.username}
+                </div>
+                <div key={subcomment.id} className="check-replay-box">
+                  {subcomment.subComment}
+                </div>
               </div>
             ))}
         </div>
@@ -174,11 +230,12 @@ function VideoPost() {
         >
           <FormGroup>
             <FormControl
+              className="replay-control"
               value={subComment}
               onChange={(e) => setSubcomment(e.target.value)}
               placeholder="Add a reply..."
             />
-            <Button variant="light" type="submit">
+            <Button variant="outline-dark" type="submit">
               Dodaj odpowiedź
             </Button>
           </FormGroup>
@@ -209,20 +266,15 @@ function VideoPost() {
                 <Button onClick={() => handleLike(postId)} variant="light">
                   <BiSolidLike
                     style={{
-                      color: postInteractions[postId]?.liked
-                        ? "green"
-                        : "#000000",
+                      color: data?.postById?.isLiked ? "green" : "#000000",
                     }}
                   />
                   {data?.postById?.likesCount || 0}
                 </Button>
-                <br />
                 <Button onClick={() => handleDislike(postId)} variant="light">
                   <BiSolidDislike
                     style={{
-                      color: postInteractions[postId]?.disliked
-                        ? "red"
-                        : "#000000",
+                      color: data?.postById?.isDisliked ? "red" : "#000000",
                     }}
                   />
                   {data?.postById?.dislikesCount || 0}
@@ -262,15 +314,16 @@ function VideoPost() {
                       <ButtonGroup>
                         <Button
                           onClick={() => handleReplyClick(comment.id)}
-                          variant="light"
+                          variant="outline-dark"
                         >
                           Answer
                         </Button>
                         <Button
                           onClick={() => handleCheckReplaysClick(comment.id)}
-                          variant="light"
+                          variant="outline-dark"
                         >
-                          <MdOutlineQuestionAnswer />
+                          <MdOutlineQuestionAnswer /> <FaTurnDown />
+                          12
                         </Button>
                       </ButtonGroup>
                     </div>
