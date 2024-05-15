@@ -21,6 +21,8 @@ const LOGIN_MUTATION = gql`
     loginUser(username: $username, password: $password) {
       user {
         username
+        email
+        id
       }
       success
     }
@@ -48,6 +50,11 @@ function Login() {
         localStorage.setItem("isLoggedIn", "true");
         setIsLoggedIn(true);
         localStorage.setItem("username", data.loginUser.user.username);
+        localStorage.setItem("userId", data.loginUser.user.id);
+        const email = data.loginUser.user.email;
+        const email2 = email.split("@")[0];
+        localStorage.setItem("email", email2);
+        console.log(data.loginUser.user.email);
       } else {
         setLoginError(t("loginError"));
       }

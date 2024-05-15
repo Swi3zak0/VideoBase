@@ -58,10 +58,11 @@ function TopNav() {
                   id="dropdown-split-basic"
                 />
                 <Dropdown.Menu>
-                  <Dropdown.Item>{t("myProfile")}</Dropdown.Item>
-                  <Dropdown.Item>{t("myLibrary")}</Dropdown.Item>
-                  <Dropdown.Item onClick={() => navigate("/changePassword")}>
-                    {t("changePassword")}
+                  <Dropdown.Item onClick={() => navigate("/myProfile")}>
+                    {t("myProfile")}
+                  </Dropdown.Item>
+                  <Dropdown.Item onClick={() => navigate("/settings")}>
+                    {t("Settings")}
                   </Dropdown.Item>
                   <Dropdown.Divider />
                   <Dropdown.Item onClick={logout} variant="light">

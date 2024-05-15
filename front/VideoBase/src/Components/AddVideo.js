@@ -78,12 +78,15 @@ function AddVideo() {
       <Row>
         <Col md={6}>
           <br />
-          <Form.Label>{filename}</Form.Label>
+
           <Card>
             <video src={videoUrl} style={{ width: "100%", height: "auto" }} />
           </Card>
+          <Form.Label className="filename-form-label">
+            File: {filename}
+          </Form.Label>
         </Col>
-        <Col md={5} className="col">
+        <Col md={5} className="col standard-form">
           <Form>
             <h1>{t("videoInfo")}</h1>
             <Form.Group>

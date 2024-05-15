@@ -71,7 +71,7 @@ const ChangePassword = () => {
   };
 
   return (
-    <div className="standard-form">
+    <div className="change-form">
       <Form onSubmit={handleSubmit}>
         <h1>{t("changePassword")}</h1>
         <FormGroup controlId="password">

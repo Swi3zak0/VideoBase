@@ -27,6 +27,7 @@ const COMMENT_QUERY = gql`
       id
       user {
         username
+        id
       }
     }
     postById(postId: $postId) {
@@ -57,6 +58,15 @@ const COMMENT_MUTATION = gql`
   }
 `;
 
+const DELETE_COMMENT_MUTATION = gql`
+  mutation DeleteComment($commentId: ID!) {
+    deleteComment(commentId: $commentId) {
+      success
+      errors
+    }
+  }
+`;
+
 const SUBCOMMENT_MUTATION = gql`
   mutation MyMutation($commentId: ID!, $subComment: String!) {
     createSubcoment(commentId: $commentId, subComment: $subComment) {
@@ -73,6 +83,8 @@ function VideoPost() {
   const username = location.state?.uploaderName;
   const videoDescription = location.state?.videoDescription;
   const postId = location.state?.postId;
+  const userId = localStorage.getItem("userId");
+  const currentUserId = userId;
 
   const [createSubcomment] = useMutation(SUBCOMMENT_MUTATION, {
     update(cache, { data: { createSubcoment } }) {
@@ -144,6 +156,25 @@ function VideoPost() {
     },
   });
 
+  const [deleteComment] = useMutation(DELETE_COMMENT_MUTATION, {
+    update(cache, { data: { deleteComment } }) {
+      if (deleteComment.success) {
+        const existingComments = cache.readQuery({
+          query: COMMENT_QUERY,
+          variables: { postId: postId },
+        });
+        const updatedComments = existingComments.postComments.filter(
+          (comment) => comment.id !== deleteComment.id
+        );
+        cache.writeQuery({
+          query: COMMENT_QUERY,
+          variables: { postId: postId },
+          data: { postComments: updatedComments },
+        });
+      }
+    },
+  });
+
   const { handleLike, handleDislike } = usePostInteractions(refetch);
   const [replyBox, setReplyBox] = useState({ open: false, commentId: null });
   const [checkReplaysBox, setCheckReplaysBox] = useState({
@@ -184,28 +215,27 @@ function VideoPost() {
       setSubcomment("");
     }
   };
+
   const handleCheckReplaysClick = (commentId) => {
     setCheckReplaysBox((prev) => ({
-      open: !prev.open,
-      commentId: commentId === prev.commentId ? null : commentId,
+      open: !prev.open && commentId !== prev.commentId,
+      commentId: commentId,
     }));
   };
 
   const renderCheckReplyBox = (commentId) => {
     if (checkReplaysBox.open && checkReplaysBox.commentId === commentId) {
+      const relevantSubcomments = data.allSubcomments.filter(
+        (subcomment) => subcomment.comment.id === commentId
+      );
       return (
         <div className="subcomments">
-          {data &&
-            data.allSubcomments.map((subcomment) => (
-              <div className="subcomment-card">
-                <div key={subcomment.id} className="replay-user">
-                  {subcomment.user.username}
-                </div>
-                <div key={subcomment.id} className="check-replay-box">
-                  {subcomment.subComment}
-                </div>
-              </div>
-            ))}
+          {relevantSubcomments.map((subcomment) => (
+            <div key={subcomment.id} className="subcomment-card">
+              <div className="replay-user">{subcomment.user.username}</div>
+              <div className="check-replay-box">{subcomment.subComment}</div>
+            </div>
+          ))}
         </div>
       );
     }
@@ -244,6 +274,16 @@ function VideoPost() {
     }
     return null;
   };
+
+  const handleDeleteComment = async (commentId) => {
+    await deleteComment({
+      variables: {
+        commentId: commentId,
+      },
+    });
+    refetch();
+  };
+
   return (
     <Container fluid>
       <Row>
@@ -280,10 +320,6 @@ function VideoPost() {
                   {data?.postById?.dislikesCount || 0}
                 </Button>
               </ButtonGroup>
-
-              <div className="views-count">
-                <FaEye /> 12
-              </div>
               <Form className="comments-form">
                 <Form.Group className="mb-3">
                   <Form.Control
@@ -323,8 +359,15 @@ function VideoPost() {
                           variant="outline-dark"
                         >
                           <MdOutlineQuestionAnswer /> <FaTurnDown />
-                          12
                         </Button>
+                        {comment.user.id === currentUserId && (
+                          <Button
+                            onClick={() => handleDeleteComment(comment.id)}
+                            variant="outline-danger"
+                          >
+                            Delete
+                          </Button>
+                        )}
                       </ButtonGroup>
                     </div>
                     {renderReplyBox(comment.id)}

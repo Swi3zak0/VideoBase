@@ -103,7 +103,14 @@ function UploadVideo() {
         >
           {isLoading ? t("loading") : t("upload")}
         </Button>
-        {file && <Form.Control plaintext readOnly defaultValue={file.name} />}
+        {file && (
+          <Form.Control
+            plaintext
+            readOnly
+            defaultValue={file.name}
+            className="filename-form-label"
+          />
+        )}
         <Button
           variant={file ? "danger" : "outline-danger"}
           disabled={!file}

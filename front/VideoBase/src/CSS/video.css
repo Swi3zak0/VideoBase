@@ -1,4 +1,7 @@
 .video {
   border-radius: 10px;
   border: 2px solid #000000;
+  margin-right: 25px;
+  width: 450px;
+  margin-top: 10px;
 }

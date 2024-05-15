@@ -14,6 +14,8 @@ import CheckToken from "./Components/CheckToken";
 import Footer from "./Components/Footer";
 import VideoPost from "./Components/VideoPost";
 import SearchScreen from "./Components/SearchScreen";
+import MyProfile from "./Components/MyProfile";
+import Settings from "./Components/Settings";
 
 const client = new ApolloClient({
   cache: new InMemoryCache(),
@@ -40,9 +42,10 @@ function App() {
             <Route path="/search/:keywords" element={<SearchScreen />} />
             <Route path="/uploadVideo" element={<UploadVideo />} />
             <Route path="/activated" element={<Activated />} />
-            <Route path="/changePassword" element={<ChangePassword />} />
             <Route path="/addVideo" element={<AddVideo />} />
             <Route path="/video/:id" element={<VideoPost />} />
+            <Route path="/myProfile" element={<MyProfile />} />
+            <Route path="/settings/*" element={<Settings />} />
           </Routes>
         </Router>
         <Footer />
