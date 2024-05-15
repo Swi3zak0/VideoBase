@@ -48,3 +48,5 @@ class SubCommentType(DjangoObjectType):
     class Meta:
         model = SubComment
         fields = "__all__"
+
+
