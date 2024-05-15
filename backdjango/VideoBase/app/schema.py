@@ -47,6 +47,7 @@ class Query(graphene.ObjectType):
         SubCommentType, comment_id=graphene.ID(required=True)
     )
     views_by_post_id = graphene.Field(ViewsType,  post_id=graphene.Int(required=True))   
+    videos_added_by_user = graphene.List(PostType)
 
     @login_required
     def resolve_all_videos(self, info):
@@ -126,7 +127,13 @@ class Query(graphene.ObjectType):
             return PostModel.objects.get(id=post_id)
         except PostModel.DoesNotExist:
             return 0
-
+        
+    def resolve_videos_added_by_user(self, info):
+        user = jwt_get_user(info)
+        posts = PostModel.objects.filter(user=user)
+        return posts
+        
+        
 
 class Mutation(graphene.ObjectType):
     verify_token = graphql_jwt.Verify.Field()

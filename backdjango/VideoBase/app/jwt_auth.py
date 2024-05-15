@@ -1,5 +1,3 @@
-
-
 import jwt
 from .models import CustomUser
 from django.core.exceptions import ObjectDoesNotExist
