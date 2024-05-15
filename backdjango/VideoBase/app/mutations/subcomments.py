@@ -36,24 +36,24 @@ class CreateSubCommentMutation(graphene.Mutation):
 
 class DeleteSubcommentMutation(graphene.Mutation):
     class Arguments:
-        comment_id = graphene.ID(required=True)
-        
+        subcomment_id = graphene.ID(required=True)
+
     success = graphene.Boolean()
     errors = graphene.String()
 
-    def mutate(self, info, comment_id):
+    def mutate(self, info, subcomment_id):
         try:
             user = jwt_get_user(info)
 
             if not user:
                 raise Exception("User not authenticated")
 
-            comment = Comment.objects.get(id=comment_id)
+            subcomment = SubComment.objects.get(id=subcomment_id)
 
-            if comment.user != user:
+            if subcomment.user != user:
                 raise Exception("You do not have permission to delete this comment")
             
-            comment.delete()
+            subcomment.delete()
             
             return DeleteSubcommentMutation(success=True, errors=None)
         except Comment.DoesNotExist:

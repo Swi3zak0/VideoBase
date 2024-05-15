@@ -17,7 +17,7 @@ from .models import Video as VideoModel
 from .models import Post as PostModel
 from .models import Comment as CommentModel
 from .models import SubComment as SubCommentModel
-from .mutations.posts import CreatePostMutation, DislikePostMutation, LikePostMutation
+from .mutations.posts import CreatePostMutation, DislikePostMutation, LikePostMutation, AddViewMutation
 from .mutations.comments import CreateCommentMutation, DeleteCommentMutation
 from .mutations.subcomments import CreateSubCommentMutation, DeleteSubcommentMutation
 # from .mutations.videos import CreateVideoMutation
@@ -135,6 +135,7 @@ class Mutation(graphene.ObjectType):
     create_post = CreatePostMutation.Field()
     like_post = LikePostMutation.Field()
     dislike_post = DislikePostMutation.Field()
+    add_view = AddViewMutation.Field()
 
     create_coment = CreateCommentMutation.Field()
     create_subcoment = CreateSubCommentMutation.Field()

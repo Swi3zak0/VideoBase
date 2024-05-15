@@ -135,5 +135,20 @@ class DislikePostMutation(graphene.Mutation):
         return DislikePostMutation(success=success)
     
 
-# class AddViewMutation(graphene.Mutation):
+class AddViewMutation(graphene.Mutation):
+    class Arguments:
+        post_id = graphene.ID(required=True)
+    
+    success = graphene.Boolean()
+
+    def mutate(self, info, post_id):
+
+        post = Post.objects.get(id=post_id)
+        post.views+=1
+        post.save()
+        success = True
+
+        return AddViewMutation(success=success)
+
+
     
