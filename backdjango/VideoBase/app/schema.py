@@ -18,8 +18,8 @@ from .models import Post as PostModel
 from .models import Comment as CommentModel
 from .models import SubComment as SubCommentModel
 from .mutations.posts import CreatePostMutation, DislikePostMutation, LikePostMutation
-from .mutations.comments import CreateCommentMutation
-from .mutations.subcomments import CreateSubCommentMutation
+from .mutations.comments import CreateCommentMutation, DeleteCommentMutation
+from .mutations.subcomments import CreateSubCommentMutation, DeleteSubcommentMutation
 # from .mutations.videos import CreateVideoMutation
 # , UpdateVideoMutation, DeleteVideoMutation
 import jwt
@@ -138,6 +138,8 @@ class Mutation(graphene.ObjectType):
 
     create_coment = CreateCommentMutation.Field()
     create_subcoment = CreateSubCommentMutation.Field()
+    delete_comment = DeleteCommentMutation.Field()
+    delete_subcomment = DeleteSubcommentMutation.Field()
 
     # create_video = CreateVideoMutation.Field()
     # update_video = UpdateVideoMutation.Field()

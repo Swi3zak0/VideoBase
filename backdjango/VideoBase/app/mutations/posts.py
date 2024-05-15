@@ -133,3 +133,7 @@ class DislikePostMutation(graphene.Mutation):
         post.save()
 
         return DislikePostMutation(success=success)
+    
+
+# class AddViewMutation(graphene.Mutation):
+    

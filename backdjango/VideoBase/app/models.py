@@ -50,7 +50,8 @@ class Post(models.Model):
     expiration_date = models.IntegerField(null=True, blank=True)
     short_url = models.CharField(max_length=255, null=False, unique=True)
     # expirated = models.BooleanField(default=False)
-    # views = models.IntegerField(default=0)
+    # views = models.ManyToManyField(
+    #     CustomUser, related_name="views", blank=True)
     # category = models.ForeignKey(Category, null=True, on_delete=models.CASCADE)
     likes = models.ManyToManyField(
         CustomUser, related_name="likes", blank=True)

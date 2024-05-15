@@ -30,3 +30,31 @@ class CreateCommentMutation(graphene.Mutation):
             return CreateCommentMutation(success=True, errors=None)
         except Exception as e:
             return CreateCommentMutation(success=False, errors=str(e))
+        
+class DeleteCommentMutation(graphene.Mutation):
+    class Arguments:
+        comment_id = graphene.ID(required=True)
+        
+    success = graphene.Boolean()
+    errors = graphene.String()
+
+    def mutate(self, info, comment_id):
+        try:
+            user = jwt_get_user(info)
+
+            if not user:
+                raise Exception("User not authenticated")
+
+            comment = Comment.objects.get(id=comment_id)
+
+            if comment.user != user:
+                raise Exception("You do not have permission to delete this comment")
+            
+            comment.delete()
+            
+            return DeleteCommentMutation(success=True, errors=None)
+        except Comment.DoesNotExist:
+            return DeleteCommentMutation(success=False, errors="Comment not found")
+        except Exception as e:
+            return DeleteCommentMutation(success=False, errors=str(e))
+
