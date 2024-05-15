@@ -11,7 +11,7 @@ from graphql_jwt.decorators import login_required
 from .models import Video as VideoModel
 from .models import Post as PostModel
 from .mutations.posts import CreatePostMutation, DislikePostMutation, LikePostMutation
-from .types.type import VideoType, PostType, CommentType, SubCommentType
+from .types.type import VideoType, PostType, CommentType, SubCommentType, ViewsType
 from graphql_jwt.decorators import login_required
 from .models import Video as VideoModel
 from .models import Post as PostModel
@@ -46,7 +46,7 @@ class Query(graphene.ObjectType):
     subcomments_by_comment_id = graphene.List(
         SubCommentType, comment_id=graphene.ID(required=True)
     )
-    views_by_post_id = graphene.Int(post_id=graphene.Int(required=True))
+    views_by_post_id = graphene.Field(ViewsType,  post_id=graphene.Int(required=True))   
 
     @login_required
     def resolve_all_videos(self, info):
@@ -123,8 +123,7 @@ class Query(graphene.ObjectType):
         
     def resolve_views_by_post_id(self, info, post_id):
         try:
-            post = PostModel.objects.get(id=post_id)
-            return post.views
+            return PostModel.objects.get(id=post_id)
         except PostModel.DoesNotExist:
             return 0
 
