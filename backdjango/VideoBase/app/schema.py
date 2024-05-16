@@ -6,18 +6,13 @@ from graphql_jwt.shortcuts import get_token, create_refresh_token, get_refresh_t
 from .models import CustomUser, Video
 from django.http import HttpResponse
 from .mutations.users import RegisterUser, LoginUser, RequestPasswordReset, ResetPassword, ChangePasswordMutation, UsersType
-from .types.type import VideoType, PostType, LikesInfo
 from graphql_jwt.decorators import login_required
-from .models import Video as VideoModel
-from .models import Post as PostModel
-from .mutations.posts import CreatePostMutation, DislikePostMutation, LikePostMutation
-from .types.type import VideoType, PostType, CommentType, SubCommentType, ViewsType
-from graphql_jwt.decorators import login_required
+from .types.type import VideoType, PostType, CommentType, SubCommentType, ViewsType, LikesInfo
 from .models import Video as VideoModel
 from .models import Post as PostModel
 from .models import Comment as CommentModel
 from .models import SubComment as SubCommentModel
-from .mutations.posts import CreatePostMutation, DislikePostMutation, LikePostMutation, AddViewMutation
+from .mutations.posts import CreatePostMutation, DeletePostMutation, DislikePostMutation, LikePostMutation, AddViewMutation
 from .mutations.comments import CreateCommentMutation, DeleteCommentMutation
 from .mutations.subcomments import CreateSubCommentMutation, DeleteSubcommentMutation
 # from .mutations.videos import CreateVideoMutation
@@ -160,6 +155,7 @@ class Mutation(graphene.ObjectType):
     change_password = ChangePasswordMutation.Field()
 
     create_post = CreatePostMutation.Field()
+    delete_post = DeletePostMutation.Field()
     like_post = LikePostMutation.Field()
     dislike_post = DislikePostMutation.Field()
     add_view = AddViewMutation.Field()

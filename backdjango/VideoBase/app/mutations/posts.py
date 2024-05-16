@@ -6,6 +6,8 @@ from django.utils import timezone
 import base64
 import jwt
 from ..jwt_auth import jwt_get_user
+from graphql_jwt.decorators import login_required
+
 
 
 class CreatePostMutation(graphene.Mutation):
@@ -63,7 +65,30 @@ class CreatePostMutation(graphene.Mutation):
         except Exception as e:
             return CreatePostMutation(success=False, errors=str(e))
 
+class DeletePostMutation(graphene.Mutation):
+    class Arguments:
+        post_id = graphene.ID(required=True)
+    
+    success = graphene.Boolean()
 
+    @login_required
+    def mutate(self, info, post_id):
+        user = jwt_get_user(info)
+
+        try:
+            post = Post.objects.get(id=post_id)
+        except Post.DoesNotExist:
+            raise Exception('Post o podanym ID nie istnieje.')
+
+        if post.user != user:
+            raise Exception('Nie jesteś właścicielem tego posta.')
+
+        post.delete()
+
+        success = True
+
+        return DeletePostMutation(success=success)
+    
 class LikePostMutation(graphene.Mutation):
     class Arguments:
         post_id = graphene.ID(required=True)
