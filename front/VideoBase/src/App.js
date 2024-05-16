@@ -16,6 +16,7 @@ import VideoPost from "./Components/VideoPost";
 import SearchScreen from "./Components/SearchScreen";
 import MyProfile from "./Components/MyProfile";
 import Settings from "./Components/Settings";
+import Terms from "./Components/Terms";
 
 const client = new ApolloClient({
   cache: new InMemoryCache(),
@@ -33,7 +34,7 @@ function App() {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Registration />} />
-            <Route path="/home" element={<Home />} />
+            <Route path="/" element={<Home />} />
             <Route path="/resetPassword" element={<ResetPassword />} />
             <Route
               path="/newPassword/:uid/:reset_code"
@@ -46,6 +47,7 @@ function App() {
             <Route path="/video/:id" element={<VideoPost />} />
             <Route path="/myProfile" element={<MyProfile />} />
             <Route path="/settings/*" element={<Settings />} />
+            <Route path="/terms" element={<Terms />} />
           </Routes>
         </Router>
         <Footer />

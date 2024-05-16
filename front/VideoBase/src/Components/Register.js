@@ -1,10 +1,10 @@
 import { Button, Form, FormGroup, FormCheck } from "react-bootstrap";
-import "../CSS/Styles.css";
 import { useState } from "react";
 import { useMutation, gql } from "@apollo/client";
 import PasswordStrengthBar from "react-password-strength-bar";
 import { EyeOutlined, EyeInvisibleOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
+import { Link } from "react-router-dom";
 
 const registerMutation = gql`
   mutation RegisterUser(
@@ -112,9 +112,20 @@ function Registration() {
         </Form.Group>
         <FormGroup>
           <FormCheck
-            className="links"
             type="checkbox"
-            label={t("acceptTerms")}
+            label={
+              <span>
+                {t("acceptTerms")}{" "}
+                <Link
+                  to="/terms"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="links"
+                >
+                  {t("termsAndConditions")}
+                </Link>
+              </span>
+            }
             checked={isTermsChecked}
             onChange={handleTermsCheckboxChange}
           />

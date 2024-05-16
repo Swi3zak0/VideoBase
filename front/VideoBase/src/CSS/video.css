@@ -5,3 +5,13 @@
   width: 450px;
   margin-top: 10px;
 }
+.videos-container {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.video-actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 10px;
+}

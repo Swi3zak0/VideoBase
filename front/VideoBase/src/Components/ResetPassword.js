@@ -3,8 +3,6 @@ import { Button, Form } from "react-bootstrap";
 import { useMutation, gql } from "@apollo/client";
 import { useTranslation } from "react-i18next";
 
-import "../CSS/Styles.css";
-
 const RESET_PASSWORD_MUTATION = gql`
   mutation Mutation($email: String!) {
     requestPasswordReset(email: $email) {

@@ -1,3 +1,6 @@
+import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import { useQuery, useMutation, gql } from "@apollo/client";
 import {
   Card,
   Col,
@@ -11,12 +14,8 @@ import {
   FormGroup,
   FormControl,
 } from "react-bootstrap";
-import { useLocation } from "react-router-dom";
 import { BiSolidLike, BiSolidDislike } from "react-icons/bi";
 import { FaEye } from "react-icons/fa";
-import { useState, useEffect } from "react";
-import { useQuery, useMutation, gql } from "@apollo/client";
-import usePostInteractions from "./PostInteractions";
 import { MdOutlineQuestionAnswer } from "react-icons/md";
 import { FaTurnDown } from "react-icons/fa6";
 
@@ -35,12 +34,14 @@ const COMMENT_QUERY = gql`
       isLiked
       likesCount
       dislikesCount
+      views
     }
     allSubcomments(postId: $postId) {
       subComment
       id
       user {
         username
+        id
       }
       comment {
         id
@@ -59,8 +60,17 @@ const COMMENT_MUTATION = gql`
 `;
 
 const DELETE_COMMENT_MUTATION = gql`
-  mutation DeleteComment($commentId: ID!) {
+  mutation deleteComment($commentId: ID!) {
     deleteComment(commentId: $commentId) {
+      success
+      errors
+    }
+  }
+`;
+
+const DELETE_SUBCOMMENT_MUTATION = gql`
+  mutation deleteSubcomment($subCommentId: ID!) {
+    deleteSubcomment(subCommentId: $subCommentId) {
       success
       errors
     }
@@ -76,6 +86,22 @@ const SUBCOMMENT_MUTATION = gql`
   }
 `;
 
+const LIKE_POST = gql`
+  mutation LikePost($postId: ID!) {
+    likePost(postId: $postId) {
+      success
+    }
+  }
+`;
+
+const DISLIKE_POST = gql`
+  mutation DislikePost($postId: ID!) {
+    dislikePost(postId: $postId) {
+      success
+    }
+  }
+`;
+
 function VideoPost() {
   const location = useLocation();
   const videoUrl = location.state?.videoUrl;
@@ -85,55 +111,6 @@ function VideoPost() {
   const postId = location.state?.postId;
   const userId = localStorage.getItem("userId");
   const currentUserId = userId;
-
-  const [createSubcomment] = useMutation(SUBCOMMENT_MUTATION, {
-    update(cache, { data: { createSubcoment } }) {
-      const existingSubcomments = cache.readQuery({
-        query: gql`
-          query GetSubcomments($postId: ID!) {
-            allSubcomments(postId: $postId) {
-              subComment
-              id
-              user {
-                username
-              }
-              comment {
-                id
-              }
-            }
-          }
-        `,
-        variables: { postId: postId },
-      });
-
-      const newSubcomment = createSubcoment;
-      const updatedSubcomments = [
-        ...existingSubcomments.allSubcomments,
-        newSubcomment,
-      ];
-
-      cache.writeQuery({
-        query: gql`
-          query GetSubcomments($postId: ID!) {
-            allSubcomments(postId: $postId) {
-              subComment
-              id
-              user {
-                username
-              }
-              comment {
-                id
-              }
-            }
-          }
-        `,
-        variables: { postId: postId },
-        data: {
-          allSubcomments: updatedSubcomments,
-        },
-      });
-    },
-  });
 
   const { data, loading, refetch } = useQuery(COMMENT_QUERY, {
     variables: { postId: postId },
@@ -175,7 +152,59 @@ function VideoPost() {
     },
   });
 
-  const { handleLike, handleDislike } = usePostInteractions(refetch);
+  const [deleteSubcomment] = useMutation(DELETE_SUBCOMMENT_MUTATION, {
+    update(cache, { data: { deleteSubcomment } }) {
+      if (deleteSubcomment.success) {
+        const existingSubcomments = cache.readQuery({
+          query: COMMENT_QUERY,
+          variables: { postId: postId },
+        });
+        const updatedSubcomments = existingSubcomments.allSubcomments.filter(
+          (subcomment) => subcomment.id !== deleteSubcomment.id
+        );
+        cache.writeQuery({
+          query: COMMENT_QUERY,
+          variables: { postId: postId },
+          data: { allSubcomments: updatedSubcomments },
+        });
+      }
+    },
+  });
+
+  const [createSubcomment] = useMutation(SUBCOMMENT_MUTATION, {
+    update(cache, { data: { createSubcoment } }) {
+      const existingSubcomments = cache.readQuery({
+        query: COMMENT_QUERY,
+        variables: { postId: postId },
+      });
+
+      const newSubcomment = createSubcoment;
+      cache.writeQuery({
+        query: COMMENT_QUERY,
+        variables: { postId: postId },
+        data: {
+          allSubcomments: [
+            ...existingSubcomments.allSubcomments,
+            newSubcomment,
+          ],
+        },
+      });
+    },
+  });
+
+  const [likePost] = useMutation(LIKE_POST);
+  const [dislikePost] = useMutation(DISLIKE_POST);
+
+  const handleLike = async () => {
+    await likePost({ variables: { postId } });
+    refetch();
+  };
+
+  const handleDislike = async () => {
+    await dislikePost({ variables: { postId } });
+    refetch();
+  };
+
   const [replyBox, setReplyBox] = useState({ open: false, commentId: null });
   const [checkReplaysBox, setCheckReplaysBox] = useState({
     open: false,
@@ -218,8 +247,8 @@ function VideoPost() {
 
   const handleCheckReplaysClick = (commentId) => {
     setCheckReplaysBox((prev) => ({
-      open: !prev.open && commentId !== prev.commentId,
-      commentId: commentId,
+      open: !(prev.open && prev.commentId === commentId),
+      commentId: prev.commentId === commentId ? null : commentId,
     }));
   };
 
@@ -228,12 +257,25 @@ function VideoPost() {
       const relevantSubcomments = data.allSubcomments.filter(
         (subcomment) => subcomment.comment.id === commentId
       );
+
+      if (relevantSubcomments.length === 0) {
+        return <div className="subcomment-card">Brak odpowiedzi</div>;
+      }
+
       return (
         <div className="subcomments">
           {relevantSubcomments.map((subcomment) => (
             <div key={subcomment.id} className="subcomment-card">
               <div className="replay-user">{subcomment.user.username}</div>
               <div className="check-replay-box">{subcomment.subComment}</div>
+              {subcomment.user.id === currentUserId && (
+                <Button
+                  onClick={() => handleDeleteSubcomment(subcomment.id)}
+                  variant="outline-danger"
+                >
+                  Delete
+                </Button>
+              )}
             </div>
           ))}
         </div>
@@ -284,6 +326,15 @@ function VideoPost() {
     refetch();
   };
 
+  const handleDeleteSubcomment = async (subCommentId) => {
+    await deleteSubcomment({
+      variables: {
+        subCommentId: subCommentId,
+      },
+    });
+    refetch();
+  };
+
   return (
     <Container fluid>
       <Row>
@@ -303,7 +354,7 @@ function VideoPost() {
             </Card.Body>
             <div>
               <ButtonGroup className="m-2">
-                <Button onClick={() => handleLike(postId)} variant="light">
+                <Button onClick={handleLike} variant="light">
                   <BiSolidLike
                     style={{
                       color: data?.postById?.isLiked ? "green" : "#000000",
@@ -311,7 +362,7 @@ function VideoPost() {
                   />
                   {data?.postById?.likesCount || 0}
                 </Button>
-                <Button onClick={() => handleDislike(postId)} variant="light">
+                <Button onClick={handleDislike} variant="light">
                   <BiSolidDislike
                     style={{
                       color: data?.postById?.isDisliked ? "red" : "#000000",
@@ -320,6 +371,9 @@ function VideoPost() {
                   {data?.postById?.dislikesCount || 0}
                 </Button>
               </ButtonGroup>
+              <div className="views-count">
+                <FaEye /> {data?.postById?.views || 0}
+              </div>
               <Form className="comments-form">
                 <Form.Group className="mb-3">
                   <Form.Control

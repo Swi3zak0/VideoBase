@@ -1,4 +1,3 @@
-import "../CSS/Styles.css";
 import { Button, ButtonGroup, Container, Dropdown } from "react-bootstrap";
 import logo from "../Images/logo.png";
 import { Navbar, Nav } from "react-bootstrap";
@@ -7,7 +6,6 @@ import { Logout } from "./Logout";
 import { Search } from "./Search";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { useEffect, useState } from "react";
 
 function TopNav() {
   const isLoggedIn = localStorage.getItem("isLoggedIn");
@@ -19,7 +17,7 @@ function TopNav() {
   return (
     <Container fluid className="no-padding">
       <Navbar className="sticky-navbar">
-        <Navbar.Brand href="/home" className="navbar-brand-custom">
+        <Navbar.Brand href="/" className="navbar-brand-custom">
           <img
             src={logo}
             width="40"

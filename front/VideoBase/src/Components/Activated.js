@@ -1,7 +1,6 @@
 import { Button, Form, FormGroup, FormLabel } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import "../CSS/Styles.css";
 
 function Activated() {
   const navigate = useNavigate();

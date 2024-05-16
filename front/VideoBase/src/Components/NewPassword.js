@@ -10,7 +10,6 @@ import { useMutation, gql } from "@apollo/client";
 import { useNavigate, useParams } from "react-router-dom";
 import { EyeOutlined, EyeInvisibleOutlined } from "@ant-design/icons";
 import { useTranslation } from "react-i18next";
-import "../CSS/Styles.css";
 
 const NEW_PASSWORD_MUTATION = gql`
   mutation Mutation(

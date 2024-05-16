@@ -91,7 +91,7 @@ function UploadVideo() {
               onChange={handleSelectFiles}
               hidden
               ref={inputRef}
-              accept="video/*"
+              accept=".mp4, .mov, .avi, .wmv, .webm, .mkv"
             />
           </Card.Body>
         </Card>

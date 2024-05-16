@@ -27,6 +27,8 @@ const POST_QUERY = gql`
       title
       id
       description
+      views
+      createTime
       user {
         username
       }
@@ -62,7 +64,7 @@ function Home() {
   const navigate = useNavigate();
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const { data, refetch } = useQuery(POST_QUERY);
+  const { data, loading, error, refetch } = useQuery(POST_QUERY);
   const [postInteractions, setPostInteractions] = useState({});
   const isLoggedIn = localStorage.getItem("isLoggedIn");
 
@@ -127,6 +129,7 @@ function Home() {
           data: { allPosts: updatedPosts },
         });
       }
+      refetch();
     },
   });
 
@@ -157,6 +160,7 @@ function Home() {
           data: { allPosts: updatedPosts },
         });
       }
+      refetch();
     },
   });
 
@@ -165,11 +169,9 @@ function Home() {
     const currentPost = updatedInteractions[postId];
 
     if (currentPost.liked) {
-      // Odznacz like
       currentPost.liked = false;
       currentPost.likes -= 1;
     } else {
-      // Zaznacz like i odznacz dislike jeśli jest zaznaczony
       currentPost.liked = true;
       currentPost.likes += 1;
       if (currentPost.disliked) {
@@ -189,11 +191,9 @@ function Home() {
     const currentPost = updatedInteractions[postId];
 
     if (currentPost.disliked) {
-      // Odznacz dislike
       currentPost.disliked = false;
       currentPost.dislikes -= 1;
     } else {
-      // Zaznacz dislike i odznacz like jeśli jest zaznaczony
       currentPost.disliked = true;
       currentPost.dislikes += 1;
       if (currentPost.liked) {
@@ -329,9 +329,9 @@ function Home() {
                     >
                       Comment <FaRegCommentDots />
                     </Button>
-                    {/* <div className="views-count">
-                      <FaEye /> 12
-                    </div> */}
+                    <div className="views-count">
+                      <FaEye /> {post.views}
+                    </div>
                   </div>
                 </Card>
               ))}
