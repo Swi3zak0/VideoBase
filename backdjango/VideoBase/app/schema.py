@@ -130,8 +130,11 @@ class Query(graphene.ObjectType):
         
     def resolve_videos_added_by_user(self, info):
         user = jwt_get_user(info)
-        posts = PostModel.objects.filter(user=user)
-        return posts
+        if user:
+            posts = PostModel.objects.filter(user=user)
+            return posts
+        else:
+            return []
         
         
 
