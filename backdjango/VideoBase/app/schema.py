@@ -48,6 +48,7 @@ class Query(graphene.ObjectType):
     )
     views_by_post_id = graphene.Field(ViewsType,  post_id=graphene.Int(required=True))   
     videos_added_by_user = graphene.List(PostType)
+    liked_posts_by_user = graphene.List(PostType)
 
     @login_required
     def resolve_all_videos(self, info):
@@ -128,11 +129,20 @@ class Query(graphene.ObjectType):
         except PostModel.DoesNotExist:
             return 0
         
+    @login_required    
     def resolve_videos_added_by_user(self, info):
         user = jwt_get_user(info)
         if user:
             posts = PostModel.objects.filter(user=user)
             return posts
+        else:
+            return []
+        
+    @login_required
+    def resolve_liked_posts_by_user(self, info):
+        user = jwt_get_user(info)
+        if user:
+            return PostModel.objects.filter(likes=user)
         else:
             return []
         
