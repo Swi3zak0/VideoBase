@@ -136,6 +136,7 @@ function MyProfile() {
                     src={post.shortUrl}
                     alt="wideo"
                     controls
+                    style={{ width: "400px", height: "auto" }}
                   />
                 </div>
               ))
@@ -154,6 +155,7 @@ function MyProfile() {
                     src={post.shortUrl}
                     alt="wideo"
                     controls
+                    style={{ width: "400px", height: "auto" }}
                   />
                   <div className="video-actions">
                     <Form.Check

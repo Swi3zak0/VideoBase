@@ -18,12 +18,14 @@ const POST_MUTATION = gql`
     $videoUrl: String!
     $description: String!
     $isPrivate: Boolean!
+    $tags: String!
   ) {
     createPost(
       title: $title
       videoUrl: $videoUrl
       description: $description
       isPrivate: $isPrivate
+      tags: $tags
     ) {
       errors
       success
@@ -41,17 +43,18 @@ function AddVideo() {
   const [description, setDescription] = useState("");
   const [title, setTitle] = useState("");
   const [isPrivate, setIsPrivate] = useState(false);
+  const [tags, setTags] = useState("");
 
   const [createPost] = useMutation(POST_MUTATION, {
     onCompleted: (data) => {
       if (data.createPost.success) {
-        setPostStatus("Film zostal dodany");
+        setPostStatus("Film został dodany");
       } else {
-        setPostStatus("Błąd dodawania filmiku: ");
+        setPostStatus("Błąd dodawania filmiku: " + data.createPost.errors);
       }
     },
-    onError: () => {
-      setPostStatus("Błąd dodawania filmiku: ");
+    onError: (error) => {
+      setPostStatus("Błąd dodawania filmiku: " + error.message);
     },
   });
 
@@ -65,15 +68,16 @@ function AddVideo() {
           description: description,
           videoUrl: videoUrl,
           isPrivate: isPrivate,
+          tags: tags,
         },
       });
     } catch (error) {
-      setPostStatus("Błąd dodawania filmiku: ");
+      setPostStatus("Błąd dodawania filmiku: " + error.message);
     }
   };
 
   return (
-    <Container fluid onSubmit={handleSubmit}>
+    <Container fluid>
       <Row>
         <Col md={6}>
           <br />
@@ -86,7 +90,7 @@ function AddVideo() {
           </Form.Label>
         </Col>
         <Col md={5} className="col standard-form">
-          <Form>
+          <Form onSubmit={handleSubmit}>
             <h1>{t("videoInfo")}</h1>
             <Form.Group>
               <Form.Label>{t("titleRequired")}</Form.Label>
@@ -94,6 +98,7 @@ function AddVideo() {
                 type="text"
                 placeholder={t("enterTitle")}
                 onChange={(e) => setTitle(e.target.value)}
+                value={title}
               />
             </Form.Group>
 
@@ -104,33 +109,30 @@ function AddVideo() {
                 rows={3}
                 placeholder={t("enterDescription")}
                 onChange={(e) => setDescription(e.target.value)}
+                value={description}
               />
               <Form.Text className="text-muted">0/3000</Form.Text>
             </Form.Group>
 
-            <Form.Group>
-              <Form.Label>{t("category")}</Form.Label>
-              <Form.Control as="select" defaultValue="">
-                <option value="">{t("chooseCategory")}</option>
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-              </Form.Control>
-            </Form.Group>
-
             <Form.Group controlId="videoTags">
               <Form.Label>{t("tags")}</Form.Label>
-              <Form.Control type="text" placeholder="#cats, #dogs" />
+              <Form.Control
+                type="text"
+                placeholder="#cats, #dogs"
+                onChange={(e) => setTags(e.target.value)}
+                value={tags}
+              />
             </Form.Group>
 
-            <Form>
+            <Form.Group>
               <FormCheck
                 type="checkbox"
                 id="check"
                 label="Private"
                 onChange={(e) => setIsPrivate(e.target.checked)}
+                checked={isPrivate}
               />
-            </Form>
+            </Form.Group>
 
             <Button className="button" variant="dark" type="submit">
               {t("addButton")}
@@ -151,4 +153,5 @@ function AddVideo() {
     </Container>
   );
 }
+
 export default AddVideo;

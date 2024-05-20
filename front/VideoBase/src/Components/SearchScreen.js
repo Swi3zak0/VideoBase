@@ -69,7 +69,7 @@ function SearchScreen() {
               className="col-md-3 px-0  cursor-pointer"
               onClick={(e) => redirectToVideo(post, e)}
             >
-              <div className="custom-card mb-4">
+              <div className="search-card mb-4">
                 <video
                   className="video"
                   src={post.shortUrl}
@@ -80,7 +80,7 @@ function SearchScreen() {
               </div>
             </div>
             <div className="col-md-3 px-0">
-              <div className="custom-card border-0">
+              <div className="search-card border-0">
                 <div className="custom-card-header">
                   <h2>
                     {post.user ? post.user.username : "Nieznany użytkownik"}

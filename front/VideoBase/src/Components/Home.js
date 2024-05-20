@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useQuery, useMutation, gql } from "@apollo/client";
+import { useQuery, gql } from "@apollo/client";
 import {
   CardHeader,
   Container,
@@ -9,7 +9,6 @@ import {
   Col,
   Card,
   Button,
-  ButtonGroup,
   CardText,
 } from "react-bootstrap";
 import { FaRegCommentDots, FaEye } from "react-icons/fa";
@@ -28,7 +27,7 @@ const POST_QUERY = gql`
       id
       description
       views
-      createTime
+
       user {
         username
       }
@@ -43,30 +42,12 @@ const POST_QUERY = gql`
   }
 `;
 
-const LIKE_POST = gql`
-  mutation LikePost($postId: ID!) {
-    likePost(postId: $postId) {
-      success
-    }
-  }
-`;
-
-const DISLIKE_POST = gql`
-  mutation DislikePost($postId: ID!) {
-    dislikePost(postId: $postId) {
-      success
-    }
-  }
-`;
-
 function Home() {
   const location = useLocation();
   const navigate = useNavigate();
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const { data, loading, error, refetch } = useQuery(POST_QUERY);
-  const [postInteractions, setPostInteractions] = useState({});
-  const isLoggedIn = localStorage.getItem("isLoggedIn");
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
@@ -86,127 +67,7 @@ function Home() {
       }, 10000);
       return () => clearTimeout(errorTimeoutId);
     }
-    if (data && data.allPosts) {
-      const initialInteractions = data.allPosts.reduce((acc, post) => {
-        acc[post.id] = {
-          liked: post.isLiked,
-          disliked: post.isDisliked,
-          likes: post.likesCount,
-          dislikes: post.dislikesCount,
-        };
-        return acc;
-      }, {});
-      setPostInteractions(initialInteractions);
-    }
-  }, [data, location.search]);
-
-  const [likePost] = useMutation(LIKE_POST, {
-    update(cache, { data: { likePost }, variables: { postId } }) {
-      if (likePost.success) {
-        const existingPosts = cache.readQuery({
-          query: POST_QUERY,
-        });
-
-        const updatedPosts = existingPosts.allPosts.map((post) => {
-          if (post.id === postId) {
-            return {
-              ...post,
-              isLiked: !post.isLiked,
-              isDisliked: false,
-              likesCount: post.isLiked
-                ? post.likesCount - 1
-                : post.likesCount + 1,
-              dislikesCount: post.isDisliked
-                ? post.dislikesCount - 1
-                : post.dislikesCount,
-            };
-          }
-          return post;
-        });
-
-        cache.writeQuery({
-          query: POST_QUERY,
-          data: { allPosts: updatedPosts },
-        });
-      }
-      refetch();
-    },
-  });
-
-  const [dislikePost] = useMutation(DISLIKE_POST, {
-    update(cache, { data: { dislikePost }, variables: { postId } }) {
-      if (dislikePost.success) {
-        const existingPosts = cache.readQuery({
-          query: POST_QUERY,
-        });
-
-        const updatedPosts = existingPosts.allPosts.map((post) => {
-          if (post.id === postId) {
-            return {
-              ...post,
-              isLiked: false,
-              isDisliked: !post.isDisliked,
-              dislikesCount: post.isDisliked
-                ? post.dislikesCount - 1
-                : post.dislikesCount + 1,
-              likesCount: post.isLiked ? post.likesCount - 1 : post.likesCount,
-            };
-          }
-          return post;
-        });
-
-        cache.writeQuery({
-          query: POST_QUERY,
-          data: { allPosts: updatedPosts },
-        });
-      }
-      refetch();
-    },
-  });
-
-  const handleLike = (postId) => {
-    const updatedInteractions = { ...postInteractions };
-    const currentPost = updatedInteractions[postId];
-
-    if (currentPost.liked) {
-      currentPost.liked = false;
-      currentPost.likes -= 1;
-    } else {
-      currentPost.liked = true;
-      currentPost.likes += 1;
-      if (currentPost.disliked) {
-        currentPost.disliked = false;
-        currentPost.dislikes -= 1;
-      }
-    }
-    setPostInteractions(updatedInteractions);
-
-    likePost({ variables: { postId } }).catch((error) =>
-      console.error("Error processing like:", error)
-    );
-  };
-
-  const handleDislike = (postId) => {
-    const updatedInteractions = { ...postInteractions };
-    const currentPost = updatedInteractions[postId];
-
-    if (currentPost.disliked) {
-      currentPost.disliked = false;
-      currentPost.dislikes -= 1;
-    } else {
-      currentPost.disliked = true;
-      currentPost.dislikes += 1;
-      if (currentPost.liked) {
-        currentPost.liked = false;
-        currentPost.likes -= 1;
-      }
-    }
-    setPostInteractions(updatedInteractions);
-
-    dislikePost({ variables: { postId } }).catch((error) =>
-      console.error("Error processing dislike:", error)
-    );
-  };
+  }, [location.search]);
 
   const redirectToVideo = (post, event) => {
     event.preventDefault();
@@ -255,86 +116,58 @@ function Home() {
               ))}
           </div>
         </Col>
-        <Col md={6} className="offset-md-1">
-          {data &&
-            data.allPosts &&
-            data.allPosts
-              .slice()
-              .reverse()
-              .map((post) => (
-                <Card key={post.id} className="mb-4">
-                  <CardHeader>
-                    {post.user ? post.user.username : "Nieznany użytkownik"}
-                  </CardHeader>
-                  <Card.Body
-                    className="cursor-pointer"
-                    onClick={(e) => redirectToVideo(post, e)}
-                  >
-                    <Card.Title>{post.title}</Card.Title>
-                    <div>
-                      <video
-                        className="video"
-                        src={post.shortUrl}
-                        alt="wideo"
-                        controls
-                        style={{ width: "100%" }}
-                      />
-                    </div>
-                    <CardText>
-                      {post.description} {post.id}
-                    </CardText>
-                  </Card.Body>
-                  <div>
-                    <ButtonGroup className="m-2">
-                      <Button
-                        onClick={() => handleLike(post.id)}
-                        variant="light"
-                        title={
-                          !isLoggedIn
-                            ? "Zaloguj się, aby polubić"
-                            : "Polub ten post"
-                        }
+        <Col md={10}>
+          <Row>
+            {data &&
+              data.allPosts &&
+              data.allPosts
+                .slice()
+                .reverse()
+                .map((post) => (
+                  <Col md={6} key={post.id}>
+                    <Card className="mb-4">
+                      <CardHeader>
+                        {post.user ? post.user.username : "Nieznany użytkownik"}
+                      </CardHeader>
+                      <Card.Body
+                        className="cursor-pointer"
+                        onClick={(e) => redirectToVideo(post, e)}
                       >
+                        <Card.Title>{post.title}</Card.Title>
+                        <div>
+                          <video
+                            className="video"
+                            src={post.shortUrl}
+                            alt="wideo"
+                            controls
+                            style={{ width: "100%" }}
+                          />
+                        </div>
+                        {/* <CardText>{post.description}</CardText> */}
+                      </Card.Body>
+                      {/* <div className="d-flex justify-content-between align-items-center m-3">
+                      <div className="d-flex align-items-center">
                         <BiSolidLike
-                          style={{
-                            color: postInteractions[post.id]?.liked
-                              ? "green"
-                              : "#000000",
-                          }}
+                          style={{ color: "green", marginRight: "5px" }}
                         />
-                        {postInteractions[post.id]?.likes || 0}
-                      </Button>
-                      <Button
-                        onClick={() => handleDislike(post.id)}
-                        variant="light"
-                        title={
-                          !isLoggedIn
-                            ? "Zaloguj się, aby niepolubić"
-                            : "Niepolub ten post"
-                        }
-                      >
+                        {post.likesCount}
                         <BiSolidDislike
                           style={{
-                            color: postInteractions[post.id]?.disliked
-                              ? "red"
-                              : "#000000",
+                            color: "red",
+                            marginLeft: "10px",
+                            marginRight: "5px",
                           }}
                         />
-                        {postInteractions[post.id]?.dislikes || 0}
-                      </Button>
-                    </ButtonGroup>
-                    <Button
-                      variant="light"
-                      onClick={(e) => redirectToVideo(post, e)}
-                    >
-                      Comment <FaRegCommentDots />
-                    </Button>
-                    <div className="views-count">
-                      <FaEye /> {post.views}
-                    </div>
-                  </div>
-                </Card>
-              ))}
+                        {post.dislikesCount}
+                      </div>
+                      <div className="d-flex align-items-center">
+                        <FaEye style={{ marginRight: "5px" }} /> {post.views}
+                      </div>
+                    </div> */}
+                    </Card>
+                  </Col>
+                ))}
+          </Row>
         </Col>
       </Row>
     </Container>

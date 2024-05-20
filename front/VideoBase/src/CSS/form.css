@@ -66,3 +66,9 @@
   margin-top: 10px;
   margin-bottom: 10px;
 }
+.reply-form {
+  margin-top: 10px;
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 5px;
+}

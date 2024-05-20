@@ -13,11 +13,13 @@ import {
   Form,
   FormGroup,
   FormControl,
+  Dropdown,
 } from "react-bootstrap";
 import { BiSolidLike, BiSolidDislike } from "react-icons/bi";
 import { FaEye } from "react-icons/fa";
 import { MdOutlineQuestionAnswer } from "react-icons/md";
 import { FaTurnDown } from "react-icons/fa6";
+import { BsThreeDotsVertical } from "react-icons/bs";
 
 const COMMENT_QUERY = gql`
   query MyQuery($postId: ID!) {
@@ -69,8 +71,8 @@ const DELETE_COMMENT_MUTATION = gql`
 `;
 
 const DELETE_SUBCOMMENT_MUTATION = gql`
-  mutation deleteSubcomment($subCommentId: ID!) {
-    deleteSubcomment(subCommentId: $subCommentId) {
+  mutation deleteSubcomment($subcommentId: ID!) {
+    deleteSubcomment(subommentId: $subommentId) {
       success
       errors
     }
@@ -159,17 +161,40 @@ function VideoPost() {
           query: COMMENT_QUERY,
           variables: { postId: postId },
         });
+
         const updatedSubcomments = existingSubcomments.allSubcomments.filter(
           (subcomment) => subcomment.id !== deleteSubcomment.id
         );
+
         cache.writeQuery({
           query: COMMENT_QUERY,
           variables: { postId: postId },
-          data: { allSubcomments: updatedSubcomments },
+          data: {
+            ...existingSubcomments,
+            allSubcomments: updatedSubcomments,
+          },
         });
       }
     },
   });
+
+  const handleDeleteSubcomment = async (subCommentId) => {
+    try {
+      const { data } = await deleteSubcomment({
+        variables: {
+          subCommentId: subCommentId,
+        },
+      });
+
+      if (data.deleteSubcomment.success) {
+        refetch();
+      } else {
+        console.error("Error:", data.deleteSubcomment.errors);
+      }
+    } catch (error) {
+      console.error("Error deleting subcomment:", error);
+    }
+  };
 
   const [createSubcomment] = useMutation(SUBCOMMENT_MUTATION, {
     update(cache, { data: { createSubcoment } }) {
@@ -192,17 +217,74 @@ function VideoPost() {
     },
   });
 
-  const [likePost] = useMutation(LIKE_POST);
-  const [dislikePost] = useMutation(DISLIKE_POST);
+  const [likePost] = useMutation(LIKE_POST, {
+    update(cache) {
+      const existingData = cache.readQuery({
+        query: COMMENT_QUERY,
+        variables: { postId },
+      });
+
+      const isLiked = existingData.postById.isLiked;
+      const isDisliked = existingData.postById.isDisliked;
+
+      cache.writeQuery({
+        query: COMMENT_QUERY,
+        variables: { postId },
+        data: {
+          ...existingData,
+          postById: {
+            ...existingData.postById,
+            isLiked: !isLiked,
+            likesCount: isLiked
+              ? existingData.postById.likesCount - 1
+              : existingData.postById.likesCount + 1,
+            isDisliked: false,
+            dislikesCount: isDisliked
+              ? existingData.postById.dislikesCount - 1
+              : existingData.postById.dislikesCount,
+          },
+        },
+      });
+    },
+  });
+
+  const [dislikePost] = useMutation(DISLIKE_POST, {
+    update(cache) {
+      const existingData = cache.readQuery({
+        query: COMMENT_QUERY,
+        variables: { postId },
+      });
+
+      const isLiked = existingData.postById.isLiked;
+      const isDisliked = existingData.postById.isDisliked;
+
+      cache.writeQuery({
+        query: COMMENT_QUERY,
+        variables: { postId },
+        data: {
+          ...existingData,
+          postById: {
+            ...existingData.postById,
+            isDisliked: !isDisliked,
+            dislikesCount: isDisliked
+              ? existingData.postById.dislikesCount - 1
+              : existingData.postById.dislikesCount + 1,
+            isLiked: false,
+            likesCount: isLiked
+              ? existingData.postById.likesCount - 1
+              : existingData.postById.likesCount,
+          },
+        },
+      });
+    },
+  });
 
   const handleLike = async () => {
     await likePost({ variables: { postId } });
-    refetch();
   };
 
   const handleDislike = async () => {
     await dislikePost({ variables: { postId } });
-    refetch();
   };
 
   const [replyBox, setReplyBox] = useState({ open: false, commentId: null });
@@ -252,6 +334,10 @@ function VideoPost() {
     }));
   };
 
+  const handleEditSubcomment = (subcommentId) => {
+    // Logika do edycji subkomentarza
+  };
+
   const renderCheckReplyBox = (commentId) => {
     if (checkReplaysBox.open && checkReplaysBox.commentId === commentId) {
       const relevantSubcomments = data.allSubcomments.filter(
@@ -259,23 +345,43 @@ function VideoPost() {
       );
 
       if (relevantSubcomments.length === 0) {
-        return <div className="subcomment-card">Brak odpowiedzi</div>;
+        return (
+          <div className="subcomment-card no-replies">Brak odpowiedzi</div>
+        );
       }
 
       return (
         <div className="subcomments">
           {relevantSubcomments.map((subcomment) => (
-            <div key={subcomment.id} className="subcomment-card">
-              <div className="replay-user">{subcomment.user.username}</div>
-              <div className="check-replay-box">{subcomment.subComment}</div>
-              {subcomment.user.id === currentUserId && (
-                <Button
-                  onClick={() => handleDeleteSubcomment(subcomment.id)}
-                  variant="outline-danger"
-                >
-                  Delete
-                </Button>
-              )}
+            <div key={subcomment.id} className="subcomment-container">
+              <div className="subcomment-card">
+                <div className="subcomment-header">
+                  <div className="replay-user">{subcomment.user.username}</div>
+                  {subcomment.user.id === currentUserId && (
+                    <Dropdown align="end" className="dropdown-menu-right">
+                      <Dropdown.Toggle
+                        variant="secondary"
+                        className="dropdown-toggle"
+                      >
+                        <BsThreeDotsVertical />
+                      </Dropdown.Toggle>
+                      <Dropdown.Menu>
+                        <Dropdown.Item
+                          onClick={() => handleEditSubcomment(subcomment.id)}
+                        >
+                          Edytuj
+                        </Dropdown.Item>
+                        <Dropdown.Item
+                          onClick={() => handleDeleteSubcomment(subcomment.id)}
+                        >
+                          Usuń
+                        </Dropdown.Item>
+                      </Dropdown.Menu>
+                    </Dropdown>
+                  )}
+                </div>
+                <div className="check-replay-box">{subcomment.subComment}</div>
+              </div>
             </div>
           ))}
         </div>
@@ -295,6 +401,7 @@ function VideoPost() {
     if (replyBox.open && replyBox.commentId === commentId) {
       return (
         <Form
+          className="reply-form"
           onSubmit={(e) => {
             e.preventDefault();
             handleSubcommentSubmit(commentId);
@@ -302,12 +409,12 @@ function VideoPost() {
         >
           <FormGroup>
             <FormControl
-              className="replay-control"
+              className="reply-control"
               value={subComment}
               onChange={(e) => setSubcomment(e.target.value)}
-              placeholder="Add a reply..."
+              placeholder="Dodaj odpowiedź..."
             />
-            <Button variant="outline-dark" type="submit">
+            <Button className="reply-button" variant="dark" type="submit">
               Dodaj odpowiedź
             </Button>
           </FormGroup>
@@ -321,15 +428,6 @@ function VideoPost() {
     await deleteComment({
       variables: {
         commentId: commentId,
-      },
-    });
-    refetch();
-  };
-
-  const handleDeleteSubcomment = async (subCommentId) => {
-    await deleteSubcomment({
-      variables: {
-        subCommentId: subCommentId,
       },
     });
     refetch();
@@ -390,23 +488,43 @@ function VideoPost() {
               </Form>
             </div>
             <div className="custom-card">
-              <h3>Comments:</h3>
+              <h3>Komentarze:</h3>
               {loading ? (
-                <div>Loading comments...</div>
+                <div>Ładowanie komentarzy...</div>
               ) : data && data.postComments.length > 0 ? (
                 data.postComments.map((comment) => (
-                  <div key={comment.id}>
-                    <div className="custom-card-header">
-                      {comment.user.username}
+                  <div key={comment.id} className="comment-container">
+                    <div className="comment-header">
+                      <div className="comment-username">
+                        {comment.user.username}
+                      </div>
+                      {comment.user.id === currentUserId && (
+                        <Dropdown align="end" className="comment-menu">
+                          <Dropdown.Toggle
+                            variant="secondary"
+                            className="dropdown-toggle"
+                          >
+                            <BsThreeDotsVertical />
+                          </Dropdown.Toggle>
+                          <Dropdown.Menu>
+                            <Dropdown.Item>Edytuj</Dropdown.Item>
+                            <Dropdown.Item
+                              onClick={() => handleDeleteComment(comment.id)}
+                            >
+                              Usuń
+                            </Dropdown.Item>
+                          </Dropdown.Menu>
+                        </Dropdown>
+                      )}
                     </div>
                     <div className="custom-card-text">{comment.comment}</div>
                     <div>
-                      <ButtonGroup>
+                      <ButtonGroup className="button-group">
                         <Button
                           onClick={() => handleReplyClick(comment.id)}
                           variant="outline-dark"
                         >
-                          Answer
+                          Odpowiedz
                         </Button>
                         <Button
                           onClick={() => handleCheckReplaysClick(comment.id)}
@@ -414,14 +532,6 @@ function VideoPost() {
                         >
                           <MdOutlineQuestionAnswer /> <FaTurnDown />
                         </Button>
-                        {comment.user.id === currentUserId && (
-                          <Button
-                            onClick={() => handleDeleteComment(comment.id)}
-                            variant="outline-danger"
-                          >
-                            Delete
-                          </Button>
-                        )}
                       </ButtonGroup>
                     </div>
                     {renderReplyBox(comment.id)}
@@ -429,19 +539,20 @@ function VideoPost() {
                   </div>
                 ))
               ) : (
-                <div>No comments</div>
+                <div>Brak komentarzy</div>
               )}
             </div>
           </Card>
         </Col>
         <Col md={{ span: 3, offset: 2 }}>
           <Card>
-            <CardHeader>recommended</CardHeader>
-            <CardText>recommended</CardText>
+            <CardHeader>rekomendowane</CardHeader>
+            <CardText>rekomendowane</CardText>
           </Card>
         </Col>
       </Row>
     </Container>
   );
 }
+
 export default VideoPost;

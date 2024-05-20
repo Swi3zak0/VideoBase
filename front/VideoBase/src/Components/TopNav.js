@@ -20,8 +20,8 @@ function TopNav() {
         <Navbar.Brand href="/" className="navbar-brand-custom">
           <img
             src={logo}
-            width="40"
-            height="40"
+            width="60"
+            height="60"
             className="d-inline-block align-top"
             alt="logo"
           />

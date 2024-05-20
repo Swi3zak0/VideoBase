@@ -21,12 +21,13 @@
   text-decoration: none !important;
 }
 .navbar-brand-custom {
-  font-size: x-large;
-  color: #fff;
+  color: gold;
+  font-size: 40px;
+  padding: 10px;
 }
 
 .navbar-brand-custom:hover {
-  color: #fff;
+  color: gold;
 }
 .sticky-navbar {
   position: fixed;

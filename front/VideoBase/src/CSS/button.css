@@ -19,3 +19,10 @@
   font-weight: bold;
   color: #fff;
 }
+.button-delete {
+  margin-top: 5px;
+}
+.button-group .btn {
+  flex-grow: 1;
+  margin-right: 5px;
+}

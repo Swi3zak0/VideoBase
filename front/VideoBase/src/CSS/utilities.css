@@ -18,20 +18,12 @@
 .coments {
   padding: 10px;
 }
-.check-replay-box {
-  width: 100%;
-  padding: 5px;
-}
 .replay-user {
   font-weight: bold;
   padding: 5px;
 }
 .subcomments {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-left: 50px;
-  padding: 10px;
+  margin-top: 15px;
 }
 .user-profile {
   margin-top: 20px;
@@ -65,4 +57,44 @@
 .settings-content {
   width: 80%;
   float: right;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}
+
+.subcomment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.check-replay-box {
+  margin-top: 10px;
+  padding: 5px;
+  background-color: #e9ecef;
+  border-radius: 5px;
+}
+
+.dropdown-toggle {
+  padding: 5px;
+}
+
+.reply-control {
+  margin-bottom: 10px;
+}
+/*--------------------------------*/
+.comment-container {
+  border-bottom: 2px solid #dad9d9;
+  padding: 10px;
+  margin-bottom: 10px;
+  position: relative;
+}
+.comment-menu {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+.comment-username {
+  font-weight: bold;
 }
