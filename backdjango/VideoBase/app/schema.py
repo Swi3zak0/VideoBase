@@ -7,7 +7,7 @@ from .models import CustomUser, Video
 from django.http import HttpResponse
 from .mutations.users import RegisterUser, LoginUser, RequestPasswordReset, ResetPassword, ChangePasswordMutation, UsersType
 from graphql_jwt.decorators import login_required
-from .types.type import VideoType, PostType, CommentType, SubCommentType, ViewsType, LikesInfo
+from .types.type import VideoType, PostType, CommentType, SubCommentType, LikesInfo
 from .models import Video as VideoModel
 from .models import Post as PostModel
 from .models import Comment as CommentModel
@@ -41,7 +41,7 @@ class Query(graphene.ObjectType):
     subcomments_by_comment_id = graphene.List(
         SubCommentType, comment_id=graphene.ID(required=True)
     )
-    views_by_post_id = graphene.Field(ViewsType,  post_id=graphene.Int(required=True))   
+    # views_by_post_id = graphene.Field(ViewsType,  post_id=graphene.Int(required=True))   
     videos_added_by_user = graphene.List(PostType)
     liked_posts_by_user = graphene.List(PostType)
 
@@ -107,7 +107,13 @@ class Query(graphene.ObjectType):
     
     def resolve_post_by_id(self, info, post_id):
         try:
+            user = jwt_get_user(info)
+
             post = PostModel.objects.get(id=post_id)
+
+            post.is_liked = user in post.likes.all() if user else False
+            post.is_disliked = user in post.dislikes.all() if user else False
+
             return post
         except ObjectDoesNotExist:
             return None

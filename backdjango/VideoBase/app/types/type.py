@@ -48,9 +48,3 @@ class SubCommentType(DjangoObjectType):
     class Meta:
         model = SubComment
         fields = "__all__"
-
-class ViewsType(DjangoObjectType):
-    class Meta:
-        model = Post
-        fields = ["views"]
-

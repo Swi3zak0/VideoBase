@@ -1,6 +1,6 @@
 import graphene
 from graphene_django.types import DjangoObjectType
-from ..models import Video, CustomUser, Post
+from ..models import Tag, Video, CustomUser, Post
 from ..types.type import PostType
 from django.utils import timezone
 import base64
@@ -17,6 +17,7 @@ class CreatePostMutation(graphene.Mutation):
         video_url = graphene.String(required=True)
         is_private = graphene.Boolean()
         expiration_date = graphene.Int()
+        tags = graphene.String()
 
     success = graphene.Boolean()
     errors = graphene.String()
@@ -26,6 +27,7 @@ class CreatePostMutation(graphene.Mutation):
         self,
         info,
         title,
+        tags,
         description,
         video_url,
         is_private,
@@ -60,6 +62,14 @@ class CreatePostMutation(graphene.Mutation):
                 is_private=is_private,
                 expiration_date=exp_date,
             )
+
+            if tags:
+                tag_list = [tag.strip() for tag in tags.split(",")]
+                for tag_name in tag_list:
+                    tag, created = Tag.objects.get_or_create(name=tag_name)
+                    post.tags.add(tag)
+
+            post.save()
 
             return CreatePostMutation(success=True, post=post)
         except Exception as e:
