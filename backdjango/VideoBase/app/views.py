@@ -39,6 +39,23 @@ def send_activation_email(recipient_email, activation_link):
 
     return HttpResponse("Email sent successfully")
 
+def send_contact_email(name, email, message):
+    subject = name
+    context = {'message': message, 'email': email, 'name': name}
+
+    html_content = render_to_string('contact_email.html', context)
+    text_content = strip_tags(html_content)
+
+    email = EmailMultiAlternatives(
+        subject,
+        text_content,
+        settings.EMAIL_HOST_USER,
+        ['videobase78@gmail.com'])
+    email.attach_alternative(html_content, "text/html")
+    email.send()
+
+    return HttpResponse("Email sent successfully")
+
 
 class CustomGraphQLView(GraphQLView):
     def dispatch(self, request, *args, **kwargs):

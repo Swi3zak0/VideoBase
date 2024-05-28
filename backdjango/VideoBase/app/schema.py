@@ -16,6 +16,7 @@ from .models import SubComment as SubCommentModel
 from .mutations.posts import CreatePostMutation, DeletePostMutation, DislikePostMutation, LikePostMutation, AddViewMutation, ChangePrivacyMutation
 from .mutations.comments import CreateCommentMutation, DeleteCommentMutation
 from .mutations.subcomments import CreateSubCommentMutation, DeleteSubcommentMutation
+from .mutations.contact import ContactEmailMutation
 # from .mutations.videos import CreateVideoMutation
 # , UpdateVideoMutation, DeleteVideoMutation
 import jwt
@@ -47,7 +48,7 @@ class Query(graphene.ObjectType):
     # views_by_post_id = graphene.Field(ViewsType,  post_id=graphene.Int(required=True))   
     videos_added_by_user = graphene.List(PostType)
     liked_posts_by_user = graphene.List(PostType)
-    recommended_videos = graphene.List(PostType, post_id=graphene.Int(required=True))
+    recommended_videos = graphene.List(PostType, post_id=graphene.ID(required=True))
 
     @login_required
     def resolve_all_videos(self, info):
@@ -205,6 +206,8 @@ class Mutation(graphene.ObjectType):
     create_subcoment = CreateSubCommentMutation.Field()
     delete_comment = DeleteCommentMutation.Field()
     delete_subcomment = DeleteSubcommentMutation.Field()
+
+    contact_email = ContactEmailMutation.Field()
 
     # create_video = CreateVideoMutation.Field()
     # update_video = UpdateVideoMutation.Field()
