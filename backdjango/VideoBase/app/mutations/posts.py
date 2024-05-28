@@ -184,6 +184,24 @@ class AddViewMutation(graphene.Mutation):
         success = True
 
         return AddViewMutation(success=success)
+    
+class ChangePrivacyMutation(graphene.Mutation):
+    class Arguments:
+        post_id = graphene.ID(required=True)
+    
+    success = graphene.Boolean()
+
+    def mutate(self, info, post_id):
+
+        post = Post.objects.get(id=post_id)
+        if post.is_private==False:
+            post.is_private=True
+        else:
+            post.is_private=False
+        post.save()
+        success = True
+
+        return ChangePrivacyMutation(success=success)
 
 
     

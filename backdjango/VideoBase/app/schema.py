@@ -13,7 +13,7 @@ from .models import Video as VideoModel
 from .models import Post as PostModel
 from .models import Comment as CommentModel
 from .models import SubComment as SubCommentModel
-from .mutations.posts import CreatePostMutation, DeletePostMutation, DislikePostMutation, LikePostMutation, AddViewMutation
+from .mutations.posts import CreatePostMutation, DeletePostMutation, DislikePostMutation, LikePostMutation, AddViewMutation, ChangePrivacyMutation
 from .mutations.comments import CreateCommentMutation, DeleteCommentMutation
 from .mutations.subcomments import CreateSubCommentMutation, DeleteSubcommentMutation
 # from .mutations.videos import CreateVideoMutation
@@ -27,6 +27,7 @@ class Query(graphene.ObjectType):
     all_users = graphene.List(UsersType)
     check_token = graphene.Boolean()
     all_videos = graphene.List(VideoType)
+    all_non_private_posts = graphene.List(PostType)
     all_posts = graphene.List(PostType)
     all_tags = graphene.List(TagType)
     search_post = graphene.List(
@@ -51,6 +52,10 @@ class Query(graphene.ObjectType):
     @login_required
     def resolve_all_videos(self, info):
         return VideoModel.objects.all()
+    
+    @login_required
+    def resolve_all_non_private_posts(self, info):
+        return PostModel.objects.all().filter(is_private=False)
 
     @login_required
     def resolve_all_users(root, info):
@@ -152,7 +157,6 @@ class Query(graphene.ObjectType):
 
     def resolve_recommended_videos(self, info, post_id):
         try:
-            # Get the post with the given post_id
             post = PostModel.objects.get(id=post_id)
             user = post.user
             first_tag = post.tags.first()
@@ -160,17 +164,13 @@ class Query(graphene.ObjectType):
             posts_by_tag = []
             posts_by_user = []
 
-            # Get posts with the same first tag if it exists
             if first_tag:
                 posts_by_tag = list(PostModel.objects.filter(tags=first_tag).exclude(id=post_id)[:4])
 
-            # Get posts by the same user
             posts_by_user = list(PostModel.objects.filter(user=user).exclude(id=post_id)[:4])
 
-            # Combine the two querysets and remove duplicates
             combined_posts = list(set(posts_by_tag) | set(posts_by_user))
 
-            # If combined posts are less than 8, add random posts
             if len(combined_posts) < 8:
                 remaining_posts = PostModel.objects.exclude(id__in=[post.id for post in combined_posts])
                 remaining_posts_count = min(8 - len(combined_posts), remaining_posts.count())
@@ -199,6 +199,7 @@ class Mutation(graphene.ObjectType):
     like_post = LikePostMutation.Field()
     dislike_post = DislikePostMutation.Field()
     add_view = AddViewMutation.Field()
+    change_privacy = ChangePrivacyMutation.Field()
 
     create_coment = CreateCommentMutation.Field()
     create_subcoment = CreateSubCommentMutation.Field()
