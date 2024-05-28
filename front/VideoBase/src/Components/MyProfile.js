@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { NavLink, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import avatar from "../Images/avatar.jpg";
@@ -19,11 +19,10 @@ const USER_VIDEOS_QUERY = gql`
   }
 `;
 
-const SET_VIDEO_PRIVATE_MUTATION = gql`
-  mutation SetVideoPrivate($videoId: ID!, $isPrivate: Boolean!) {
-    setVideoPrivate(videoId: $videoId, isPrivate: $isPrivate) {
+const CHANGE_PRIVACY_MUTATION = gql`
+  mutation ChangePrivacy($postId: ID!) {
+    changePrivacy(postId: $postId) {
       success
-      message
     }
   }
 `;
@@ -44,7 +43,7 @@ function MyProfile() {
   const { t } = useTranslation();
 
   const { data, loading, error, refetch } = useQuery(USER_VIDEOS_QUERY);
-  const [setVideoPrivate] = useMutation(SET_VIDEO_PRIVATE_MUTATION, {
+  const [changePrivacy] = useMutation(CHANGE_PRIVACY_MUTATION, {
     onCompleted: () => refetch(),
   });
 
@@ -79,12 +78,22 @@ function MyProfile() {
     });
   };
 
-  const handleSetPrivate = async (videoId, isPrivate) => {
-    await setVideoPrivate({ variables: { videoId, isPrivate } });
+  const handleSetPrivate = async (videoId) => {
+    try {
+      const { data } = await changePrivacy({ variables: { postId: videoId } });
+    } catch (error) {
+      console.error("Error setting video privacy:", error);
+    }
   };
 
   const handleDelete = async (postId) => {
-    await deletePost({ variables: { postId } });
+    console.log("Deleting post:", postId);
+    try {
+      const { data } = await deletePost({ variables: { postId } });
+      console.log("Response:", data);
+    } catch (error) {
+      console.error("Error deleting post:", error);
+    }
   };
 
   return (
@@ -160,9 +169,7 @@ function MyProfile() {
                       id={`custom-switch-${post.id}`}
                       label={t("private")}
                       checked={post.isPrivate}
-                      onChange={() =>
-                        handleSetPrivate(post.id, !post.isPrivate)
-                      }
+                      onChange={() => handleSetPrivate(post.id)}
                     />
                     <button onClick={() => handleDelete(post.id)}>
                       {t("delete")}

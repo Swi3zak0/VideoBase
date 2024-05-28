@@ -119,5 +119,9 @@
   "recommended": "Recommended",
   "addReplyPlaceholder": "Add a reply...",
   "addReplyButton": "Add Reply",
-  "edit": "Edit"
+  "edit": "Edit",
+
+  "noVideosFound": "No videos found for: ",
+  "unknownUser": "Unknown user",
+  "unloggedUser": "Unlogged user"
 }

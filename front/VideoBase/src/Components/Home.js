@@ -8,17 +8,13 @@ import {
   Row,
   Col,
   Card,
-  Button,
-  CardText,
 } from "react-bootstrap";
-import { FaRegCommentDots, FaEye } from "react-icons/fa";
-import { BiSolidLike, BiSolidDislike } from "react-icons/bi";
 import { IoIosStarOutline } from "react-icons/io";
 import avatar from "../Images/avatar.jpg";
 
 const POST_QUERY = gql`
   query MyQuery {
-    allPosts {
+    allNonPrivatePosts {
       isLiked
       isDisliked
       dislikesCount
@@ -28,7 +24,6 @@ const POST_QUERY = gql`
       id
       description
       views
-
       user {
         username
       }
@@ -130,8 +125,8 @@ function Home() {
         <Col md={10}>
           <Row>
             {data &&
-              data.allPosts &&
-              data.allPosts
+              data.allNonPrivatePosts &&
+              data.allNonPrivatePosts
                 .slice()
                 .reverse()
                 .map((post) => (

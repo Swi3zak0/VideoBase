@@ -119,5 +119,9 @@
   "recommended": "Rekomendowane",
   "addReplyPlaceholder": "Dodaj odpowiedź...",
   "addReplyButton": "Dodaj odpowiedź",
-  "edit": "Edytuj"
+  "edit": "Edytuj",
+
+  "noVideosFound": "Nie znaleziono filmów dla: ",
+  "unknownUser": "Nieznany użytkownik",
+  "unloggedUser": "Niezalogowany użytkownik"
 }

@@ -7,6 +7,15 @@ import {
   FormLabel,
 } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
+import { gql, useMutation } from "@apollo/client";
+
+const CONTACT_EMAIL_MUTATION = gql`
+  mutation ContactEmail($email: String!, $message: String!, $name: String!) {
+    contactEmail(email: $email, message: $message, name: $name) {
+      success
+    }
+  }
+`;
 
 function ContactUs() {
   const [name, setName] = useState("");
@@ -16,13 +25,32 @@ function ContactUs() {
   const [isSuccess, setIsSuccess] = useState(false);
   const { t } = useTranslation();
 
+  const [contactEmail] = useMutation(CONTACT_EMAIL_MUTATION, {
+    onCompleted: (data) => {
+      if (data.contactEmail.success) {
+        setStatusMessage(t("messageSent"));
+        setIsSuccess(true);
+        resetFormFields();
+      } else {
+        setStatusMessage(t("messageFailed"));
+        setIsSuccess(false);
+      }
+    },
+    onError: (error) => {
+      setStatusMessage(`${t("messageFailed")}: ${error.message}`);
+      setIsSuccess(false);
+    },
+  });
+
   const handleSubmit = (event) => {
     event.preventDefault();
-    // Logika obsługi formularza kontaktowego
-    // Możesz tutaj dodać logikę wysyłania danych do serwera itp.
-    setStatusMessage(t("messageSent"));
-    setIsSuccess(true);
-    resetFormFields();
+    contactEmail({
+      variables: {
+        email: email,
+        message: message,
+        name: name,
+      },
+    });
   };
 
   const resetFormFields = () => {

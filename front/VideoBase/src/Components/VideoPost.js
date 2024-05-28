@@ -53,6 +53,19 @@ const COMMENT_QUERY = gql`
   }
 `;
 
+const RECOMMENDED_VIDEOS_QUERY = gql`
+  query MyQuery($postId: ID!) {
+    recommendedVideos(postId: $postId) {
+      id
+      title
+      shortUrl
+      user {
+        username
+      }
+    }
+  }
+`;
+
 const COMMENT_MUTATION = gql`
   mutation MyMutation($comment: String!, $postId: ID!) {
     createComent(comment: $comment, postId: $postId) {
@@ -119,6 +132,13 @@ function VideoPost() {
   const { data, loading, refetch } = useQuery(COMMENT_QUERY, {
     variables: { postId: postId },
   });
+
+  const { data: recommendedData, loading: recommendedLoading } = useQuery(
+    RECOMMENDED_VIDEOS_QUERY,
+    {
+      variables: { postId: postId },
+    }
+  );
 
   const [createComment] = useMutation(COMMENT_MUTATION, {
     update(cache, { data: { createComent } }) {
@@ -550,7 +570,26 @@ function VideoPost() {
         <Col md={{ span: 3, offset: 2 }}>
           <Card>
             <CardHeader>{t("recommended")}</CardHeader>
-            <CardText>{t("recommended")}</CardText>
+            {recommendedLoading ? (
+              <CardText>{t("loadingRecommendations")}</CardText>
+            ) : (
+              <div className="row">
+                {recommendedData?.recommendedVideos?.map((video) => (
+                  <div key={video.id} className="col-md-12 mb-3">
+                    <div className="video-thumbnail">
+                      <video
+                        src={video.shortUrl}
+                        alt={video.title}
+                        controls
+                        style={{ width: "100%" }}
+                      />
+                    </div>
+                    <div className="video-title">{video.title}</div>
+                    {video.user && <div>{video.user.username}</div>}
+                  </div>
+                ))}
+              </div>
+            )}
           </Card>
         </Col>
       </Row>
