@@ -8,9 +8,7 @@
   font-weight: bold;
   text-decoration: none;
 }
-.footer-link {
-  color: #fff;
-}
+
 .cursor-pointer {
   cursor: pointer;
 }
@@ -26,7 +24,7 @@
   margin-top: 15px;
 }
 .user-profile {
-  margin-top: 20px;
+  margin-top: 50px;
   display: flex;
   align-items: center;
   background-color: #3d3d3d;
@@ -36,7 +34,7 @@
 .avatar img {
   width: 64px;
   height: 60px;
-  border-radius: 50%;
+  border-radius: 25%;
   margin-right: 15px;
 }
 

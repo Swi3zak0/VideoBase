@@ -3,6 +3,7 @@ import { NavLink, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import avatar from "../Images/avatar.jpg";
 import { useQuery, useMutation, gql } from "@apollo/client";
+import { useTranslation } from "react-i18next";
 
 const USER_VIDEOS_QUERY = gql`
   query MyQuery {
@@ -27,15 +28,6 @@ const SET_VIDEO_PRIVATE_MUTATION = gql`
   }
 `;
 
-const DELETE_VIDEO_MUTATION = gql`
-  mutation DeleteVideo($videoId: ID!) {
-    deleteVideo(videoId: $videoId) {
-      success
-      message
-    }
-  }
-`;
-
 const DELETE_POST_MUTATION = gql`
   mutation DeletePost($postId: ID!) {
     deletePost(postId: $postId) {
@@ -49,19 +41,24 @@ function MyProfile() {
   const [view, setView] = useState("myLikes");
   const username = localStorage.getItem("username");
   const email = localStorage.getItem("email");
+  const { t } = useTranslation();
+
   const { data, loading, error, refetch } = useQuery(USER_VIDEOS_QUERY);
   const [setVideoPrivate] = useMutation(SET_VIDEO_PRIVATE_MUTATION, {
     onCompleted: () => refetch(),
   });
-  const [deleteVideo] = useMutation(DELETE_VIDEO_MUTATION, {
-    onCompleted: () => refetch(),
-  });
+
   const [deletePost] = useMutation(DELETE_POST_MUTATION, {
     onCompleted: () => refetch(),
   });
 
-  if (loading) return <p>Ładowanie...</p>;
-  if (error) return <p>Błąd: {error.message}</p>;
+  if (loading) return <p>{t("loading")}</p>;
+  if (error)
+    return (
+      <p>
+        {t("error")} {error.message}
+      </p>
+    );
 
   const handleViewChange = (newView) => {
     setView(newView);
@@ -109,7 +106,7 @@ function MyProfile() {
               view === "myLikes" ? "profile-link active" : "profile-link"
             }
           >
-            Polubione filmy
+            {t("likedVideos")}
           </NavLink>
         </div>
         <div onClick={() => handleViewChange("myVideos")}>
@@ -118,7 +115,7 @@ function MyProfile() {
               view === "myVideos" ? "profile-link active" : "profile-link"
             }
           >
-            Moje filmy
+            {t("addedVideos")}
           </NavLink>
         </div>
       </div>
@@ -126,7 +123,7 @@ function MyProfile() {
         {view === "myLikes" ? (
           <div>
             {data.likedPostsByUser.length === 0 ? (
-              <div>Brak polubionych postów</div>
+              <div>{t("noLikedPosts")}</div>
             ) : (
               data.likedPostsByUser.map((post) => (
                 <div key={post.id} className="videos-container">
@@ -134,7 +131,7 @@ function MyProfile() {
                     className="video cursor-pointer"
                     onClick={(e) => redirectToVideo(post, e)}
                     src={post.shortUrl}
-                    alt="wideo"
+                    alt="video"
                     controls
                     style={{ width: "400px", height: "auto" }}
                   />
@@ -145,7 +142,7 @@ function MyProfile() {
         ) : (
           <div>
             {data.videosAddedByUser.length === 0 ? (
-              <div>Brak dodanych postów</div>
+              <div>{t("noAddedPosts")}</div>
             ) : (
               data.videosAddedByUser.map((post) => (
                 <div key={post.id} className="videos-container">
@@ -153,7 +150,7 @@ function MyProfile() {
                     className="video cursor-pointer"
                     onClick={(e) => redirectToVideo(post, e)}
                     src={post.shortUrl}
-                    alt="wideo"
+                    alt="video"
                     controls
                     style={{ width: "400px", height: "auto" }}
                   />
@@ -161,13 +158,15 @@ function MyProfile() {
                     <Form.Check
                       type="switch"
                       id={`custom-switch-${post.id}`}
-                      label="Private"
+                      label={t("private")}
                       checked={post.isPrivate}
                       onChange={() =>
                         handleSetPrivate(post.id, !post.isPrivate)
                       }
                     />
-                    <button onClick={() => handleDelete(post.id)}>Usuń</button>
+                    <button onClick={() => handleDelete(post.id)}>
+                      {t("delete")}
+                    </button>
                   </div>
                 </div>
               ))

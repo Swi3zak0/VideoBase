@@ -3,10 +3,8 @@ import Registration from "./Components/Register";
 import Login from "./Components/Login";
 import TopNav from "./Components/TopNav";
 import Home from "./Components/Home";
-import ChangePassword from "./Components/ChangePassword";
 import { ApolloClient, ApolloProvider, InMemoryCache } from "@apollo/client";
 import UploadVideo from "./Components/UploadVideo";
-import Activated from "./Components/Activated";
 import NewPassword from "./Components/NewPassword";
 import ResetPassword from "./Components/ResetPassword";
 import AddVideo from "./Components/AddVideo";
@@ -42,7 +40,6 @@ function App() {
             />
             <Route path="/search/:keywords" element={<SearchScreen />} />
             <Route path="/uploadVideo" element={<UploadVideo />} />
-            <Route path="/activated" element={<Activated />} />
             <Route path="/addVideo" element={<AddVideo />} />
             <Route path="/video/:id" element={<VideoPost />} />
             <Route path="/myProfile" element={<MyProfile />} />

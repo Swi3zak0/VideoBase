@@ -74,11 +74,45 @@
   padding: 10px;
 }
 .sticky-card {
-  margin-top: 50px;
+  margin-top: 40px;
   position: fixed;
   z-index: 1000;
   width: 15%;
   left: 0;
+  background-color: #333;
+  border: 1px solid #444;
+  border-top-right-radius: 10px;
+  border-bottom-right-radius: 10px;
+  color: #fff;
+}
+
+.sticky-card .card-header {
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #222;
+  border-bottom: 2px solid #f1c40f;
+  border-radius: 8px 8px 0 0;
+  padding: 10px;
+  color: #fff;
+}
+
+.sticky-card .card-header svg {
+  font-size: 1.5rem;
+  color: #f1c40f;
+}
+
+.sticky-card .list-group-item {
+  background-color: #333;
+  border: none;
+  border-bottom: 1px solid #444;
+  color: #fff;
+}
+
+.sticky-card .list-group-item:hover {
+  background-color: #444;
+  cursor: pointer;
 }
 .subcomment-card {
   background-color: #f8f9fa;

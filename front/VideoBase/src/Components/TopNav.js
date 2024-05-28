@@ -1,6 +1,13 @@
-import { Button, ButtonGroup, Container, Dropdown } from "react-bootstrap";
+import React from "react";
+import {
+  Button,
+  ButtonGroup,
+  Container,
+  Dropdown,
+  Navbar,
+  Nav,
+} from "react-bootstrap";
 import logo from "../Images/logo.png";
-import { Navbar, Nav } from "react-bootstrap";
 import { LinkContainer } from "react-router-bootstrap";
 import { Logout } from "./Logout";
 import { Search } from "./Search";
@@ -32,7 +39,7 @@ function TopNav() {
           {!isLoggedIn ? (
             <>
               <LinkContainer to="/uploadVideo">
-                <Nav.Link className="nav-links"> {t("addVideo")}</Nav.Link>
+                <Nav.Link className="nav-links">{t("addVideo")}</Nav.Link>
               </LinkContainer>
               <LinkContainer to="/login">
                 <Nav.Link className="nav-links">{t("signIn")}</Nav.Link>
@@ -60,7 +67,7 @@ function TopNav() {
                     {t("myProfile")}
                   </Dropdown.Item>
                   <Dropdown.Item onClick={() => navigate("/settings")}>
-                    {t("Settings")}
+                    {t("settings")}
                   </Dropdown.Item>
                   <Dropdown.Divider />
                   <Dropdown.Item onClick={logout} variant="light">

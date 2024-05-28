@@ -14,6 +14,7 @@ import {
 import { FaRegCommentDots, FaEye } from "react-icons/fa";
 import { BiSolidLike, BiSolidDislike } from "react-icons/bi";
 import { IoIosStarOutline } from "react-icons/io";
+import avatar from "../Images/avatar.jpg";
 
 const POST_QUERY = gql`
   query MyQuery {
@@ -47,7 +48,8 @@ function Home() {
   const navigate = useNavigate();
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const { data, loading, error, refetch } = useQuery(POST_QUERY);
+  const { data } = useQuery(POST_QUERY);
+  // const avatar = localStorage.getItem("avatar");
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
@@ -103,7 +105,7 @@ function Home() {
       <Row>
         <Col md={2}>
           <div className="sticky-card">
-            <Card.Header>
+            <Card.Header className="card-header">
               Popular
               <IoIosStarOutline />
             </Card.Header>
@@ -111,7 +113,16 @@ function Home() {
               data.allUsers &&
               data.allUsers.map((user, index) => (
                 <ListGroup key={index}>
-                  <ListGroup.Item>{user.username}</ListGroup.Item>
+                  <ListGroup.Item className="list-group-item">
+                    <img
+                      className="avatar"
+                      src={avatar}
+                      width="40"
+                      height="40"
+                      alt="avatar"
+                    />{" "}
+                    {user.username}
+                  </ListGroup.Item>
                 </ListGroup>
               ))}
           </div>

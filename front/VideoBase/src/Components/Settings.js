@@ -3,31 +3,34 @@ import { Card, Container, Row, Col } from "react-bootstrap";
 import ChangePassword from "./ChangePassword";
 import Account from "./Account";
 import DeleteAccount from "./DeleteAccount";
-import ContactUs from "./Contact";
+import Contact from "./Contact";
 import Terms from "./Terms";
+import { useTranslation } from "react-i18next";
 
 function Settings() {
+  const { t } = useTranslation();
+
   return (
     <Container fluid>
       <Row className="gx-5">
         <Col md={2}>
           <Card>
-            <Card.Header>My Profile</Card.Header>
+            <Card.Header>{t("myProfile")}</Card.Header>
             <div className="nav-section">
               <NavLink to="account" className="nav-link">
-                My Account
+                {t("myAccount")}
               </NavLink>
               <NavLink to="changePassword" className="nav-link">
-                Change Password
+                {t("changePassword")}
               </NavLink>
               <NavLink to="deleteAccount" className="nav-link">
-                Delete Account
+                {t("deleteAccount")}
               </NavLink>
               <NavLink to="contact" className="nav-link">
-                Contact Us
+                {t("contactUs")}
               </NavLink>
               <NavLink to="terms" className="nav-link">
-                Terms and Conditions
+                {t("termsAndConditions")}
               </NavLink>
             </div>
           </Card>
@@ -38,7 +41,7 @@ function Settings() {
             <Route path="account" element={<Account />} />
             <Route path="/" element={<Navigate to="account" />} />
             <Route path="deleteAccount" element={<DeleteAccount />} />
-            <Route path="contact" element={<ContactUs />} />
+            <Route path="contact" element={<Contact />} />
             <Route path="terms" element={<Terms />} />
           </Routes>
         </Col>

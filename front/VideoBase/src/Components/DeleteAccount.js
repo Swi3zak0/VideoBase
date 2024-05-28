@@ -1,7 +1,10 @@
 import React from "react";
 import { Button, Alert } from "react-bootstrap";
+import { useTranslation } from "react-i18next";
 
 function DeleteAccount() {
+  const { t } = useTranslation();
+
   const handleDeleteAccount = () => {
     console.log("Account deleted");
   };
@@ -9,15 +12,11 @@ function DeleteAccount() {
   return (
     <div className="change-form">
       <Alert variant="warning">
-        <Alert.Heading>
-          Are you sure you want to delete your account?
-        </Alert.Heading>
-        <p>
-          This action cannot be undone. Please make sure you want to proceed.
-        </p>
+        <Alert.Heading>{t("deleteAccountTitle")}</Alert.Heading>
+        <p>{t("deleteAccountWarning")}</p>
       </Alert>
       <Button variant="danger" onClick={handleDeleteAccount}>
-        Delete My Account
+        {t("deleteAccountButton")}
       </Button>
     </div>
   );

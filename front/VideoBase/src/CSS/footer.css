@@ -1,8 +1,11 @@
 .footer {
   margin-top: auto;
   background-color: #3d3d3d;
-  color: #fff;
+  color: #f1c40f;
   text-align: center;
   width: 100%;
   padding: 15px 0;
+}
+.footer-link {
+  color: #f1c40f;
 }

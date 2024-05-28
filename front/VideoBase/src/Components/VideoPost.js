@@ -20,6 +20,7 @@ import { FaEye } from "react-icons/fa";
 import { MdOutlineQuestionAnswer } from "react-icons/md";
 import { FaTurnDown } from "react-icons/fa6";
 import { BsThreeDotsVertical } from "react-icons/bs";
+import { useTranslation } from "react-i18next";
 
 const COMMENT_QUERY = gql`
   query MyQuery($postId: ID!) {
@@ -72,7 +73,7 @@ const DELETE_COMMENT_MUTATION = gql`
 
 const DELETE_SUBCOMMENT_MUTATION = gql`
   mutation deleteSubcomment($subcommentId: ID!) {
-    deleteSubcomment(subommentId: $subommentId) {
+    deleteSubcomment(subcommentId: $subcommentId) {
       success
       errors
     }
@@ -113,6 +114,7 @@ function VideoPost() {
   const postId = location.state?.postId;
   const userId = localStorage.getItem("userId");
   const currentUserId = userId;
+  const { t } = useTranslation();
 
   const { data, loading, refetch } = useQuery(COMMENT_QUERY, {
     variables: { postId: postId },
@@ -157,12 +159,12 @@ function VideoPost() {
   const [deleteSubcomment] = useMutation(DELETE_SUBCOMMENT_MUTATION, {
     update(cache, { data: { deleteSubcomment } }) {
       if (deleteSubcomment.success) {
-        const existingSubcomments = cache.readQuery({
+        const existingData = cache.readQuery({
           query: COMMENT_QUERY,
           variables: { postId: postId },
         });
 
-        const updatedSubcomments = existingSubcomments.allSubcomments.filter(
+        const updatedSubcomments = existingData.allSubcomments.filter(
           (subcomment) => subcomment.id !== deleteSubcomment.id
         );
 
@@ -170,7 +172,7 @@ function VideoPost() {
           query: COMMENT_QUERY,
           variables: { postId: postId },
           data: {
-            ...existingSubcomments,
+            ...existingData,
             allSubcomments: updatedSubcomments,
           },
         });
@@ -178,11 +180,12 @@ function VideoPost() {
     },
   });
 
-  const handleDeleteSubcomment = async (subCommentId) => {
+  const handleDeleteSubcomment = async (subcommentId) => {
     try {
+      console.log("Deleting subcomment with ID:", subcommentId);
       const { data } = await deleteSubcomment({
         variables: {
-          subCommentId: subCommentId,
+          subcommentId: subcommentId,
         },
       });
 
@@ -346,7 +349,7 @@ function VideoPost() {
 
       if (relevantSubcomments.length === 0) {
         return (
-          <div className="subcomment-card no-replies">Brak odpowiedzi</div>
+          <div className="subcomment-card no-replies">{t("noComments")}</div>
         );
       }
 
@@ -369,12 +372,12 @@ function VideoPost() {
                         <Dropdown.Item
                           onClick={() => handleEditSubcomment(subcomment.id)}
                         >
-                          Edytuj
+                          {t("edit")}
                         </Dropdown.Item>
                         <Dropdown.Item
                           onClick={() => handleDeleteSubcomment(subcomment.id)}
                         >
-                          Usuń
+                          {t("delete")}
                         </Dropdown.Item>
                       </Dropdown.Menu>
                     </Dropdown>
@@ -412,10 +415,10 @@ function VideoPost() {
               className="reply-control"
               value={subComment}
               onChange={(e) => setSubcomment(e.target.value)}
-              placeholder="Dodaj odpowiedź..."
+              placeholder={t("addReplyPlaceholder")}
             />
             <Button className="reply-button" variant="dark" type="submit">
-              Dodaj odpowiedź
+              {t("addReplyButton")}
             </Button>
           </FormGroup>
         </Form>
@@ -444,7 +447,7 @@ function VideoPost() {
               <video
                 className="video cursor-pointer"
                 src={videoUrl}
-                alt="wideo"
+                alt="video"
                 controls="controls"
                 style={{ width: "100%" }}
               />{" "}
@@ -479,18 +482,18 @@ function VideoPost() {
                     className="mb-2"
                     value={comment}
                     onChange={(e) => setComment(e.target.value)}
-                    placeholder="Dodaj komentarz..."
+                    placeholder={t("addCommentPlaceholder")}
                   />
                   <Button onClick={handleCommentSubmit} variant="dark">
-                    Dodaj komentarz
+                    {t("addCommentButton")}
                   </Button>
                 </Form.Group>
               </Form>
             </div>
             <div className="custom-card">
-              <h3>Komentarze:</h3>
+              <h3>{t("commentsSection")}</h3>
               {loading ? (
-                <div>Ładowanie komentarzy...</div>
+                <div>{t("loadingComments")}</div>
               ) : data && data.postComments.length > 0 ? (
                 data.postComments.map((comment) => (
                   <div key={comment.id} className="comment-container">
@@ -507,11 +510,11 @@ function VideoPost() {
                             <BsThreeDotsVertical />
                           </Dropdown.Toggle>
                           <Dropdown.Menu>
-                            <Dropdown.Item>Edytuj</Dropdown.Item>
+                            <Dropdown.Item>{t("edit")}</Dropdown.Item>
                             <Dropdown.Item
                               onClick={() => handleDeleteComment(comment.id)}
                             >
-                              Usuń
+                              {t("delete")}
                             </Dropdown.Item>
                           </Dropdown.Menu>
                         </Dropdown>
@@ -524,7 +527,7 @@ function VideoPost() {
                           onClick={() => handleReplyClick(comment.id)}
                           variant="outline-dark"
                         >
-                          Odpowiedz
+                          {t("reply")}
                         </Button>
                         <Button
                           onClick={() => handleCheckReplaysClick(comment.id)}
@@ -539,15 +542,15 @@ function VideoPost() {
                   </div>
                 ))
               ) : (
-                <div>Brak komentarzy</div>
+                <div>{t("noComments")}</div>
               )}
             </div>
           </Card>
         </Col>
         <Col md={{ span: 3, offset: 2 }}>
           <Card>
-            <CardHeader>rekomendowane</CardHeader>
-            <CardText>rekomendowane</CardText>
+            <CardHeader>{t("recommended")}</CardHeader>
+            <CardText>{t("recommended")}</CardText>
           </Card>
         </Col>
       </Row>
