@@ -17,6 +17,7 @@ import random
 import string
 from django.utils.crypto import constant_time_compare
 from ..types.type import UsersType
+from ..jwt_auth import jwt_get_user
 
 
 class RegisterUser(graphene.Mutation):
@@ -198,3 +199,14 @@ class ChangePasswordMutation(graphene.Mutation):
             raise GraphQLError('Nieprawidłowy token.')
         except CustomUser.DoesNotExist:
             raise GraphQLError('Nie znaleziono użytkownika.')
+
+
+class DeleteUserAccountMutation(graphene.Mutation):
+    success = graphene.Boolean()
+
+    def mutate(self, info):
+        user = jwt_get_user(info)
+        if user:
+            user.delete()
+            return DeleteUserAccountMutation(success=True)
+        return DeleteUserAccountMutation(successs = False)

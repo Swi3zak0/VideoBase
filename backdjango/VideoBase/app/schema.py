@@ -6,7 +6,7 @@ from django.db.models import Q
 from graphql_jwt.shortcuts import get_token, create_refresh_token, get_refresh_token
 from .models import CustomUser, Tag, Video
 from django.http import HttpResponse
-from .mutations.users import RegisterUser, LoginUser, RequestPasswordReset, ResetPassword, ChangePasswordMutation, UsersType
+from .mutations.users import RegisterUser, LoginUser, RequestPasswordReset, ResetPassword, ChangePasswordMutation, UsersType, DeleteUserAccountMutation
 from graphql_jwt.decorators import login_required
 from .types.type import VideoType, PostType, CommentType, SubCommentType, LikesInfo, TagType
 from .models import Video as VideoModel
@@ -208,6 +208,7 @@ class Mutation(graphene.ObjectType):
     delete_subcomment = DeleteSubcommentMutation.Field()
 
     contact_email = ContactEmailMutation.Field()
+    delete_user_account = DeleteUserAccountMutation.Field()
 
     # create_video = CreateVideoMutation.Field()
     # update_video = UpdateVideoMutation.Field()
