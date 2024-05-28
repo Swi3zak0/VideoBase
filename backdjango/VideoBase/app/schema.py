@@ -1,13 +1,14 @@
+from random import sample
 from django.forms import ValidationError
 import graphene
 import graphql_jwt
 from django.db.models import Q
 from graphql_jwt.shortcuts import get_token, create_refresh_token, get_refresh_token
-from .models import CustomUser, Video
+from .models import CustomUser, Tag, Video
 from django.http import HttpResponse
 from .mutations.users import RegisterUser, LoginUser, RequestPasswordReset, ResetPassword, ChangePasswordMutation, UsersType
 from graphql_jwt.decorators import login_required
-from .types.type import VideoType, PostType, CommentType, SubCommentType, LikesInfo
+from .types.type import VideoType, PostType, CommentType, SubCommentType, LikesInfo, TagType
 from .models import Video as VideoModel
 from .models import Post as PostModel
 from .models import Comment as CommentModel
@@ -27,8 +28,9 @@ class Query(graphene.ObjectType):
     check_token = graphene.Boolean()
     all_videos = graphene.List(VideoType)
     all_posts = graphene.List(PostType)
+    all_tags = graphene.List(TagType)
     search_post = graphene.List(
-        PostType, search=graphene.String(), category=graphene.String())
+        PostType, search=graphene.String())
     check_likes = graphene.List(LikesInfo, post_id=graphene.Int())
     post_comments = graphene.List(
         CommentType, post_id=graphene.ID(required=True))
@@ -44,6 +46,7 @@ class Query(graphene.ObjectType):
     # views_by_post_id = graphene.Field(ViewsType,  post_id=graphene.Int(required=True))   
     videos_added_by_user = graphene.List(PostType)
     liked_posts_by_user = graphene.List(PostType)
+    recommended_videos = graphene.List(PostType, post_id=graphene.Int(required=True))
 
     @login_required
     def resolve_all_videos(self, info):
@@ -56,9 +59,12 @@ class Query(graphene.ObjectType):
     @login_required
     def resolve_check_token(self, info):
         return True
+    
+    def resolve_all_tags(root, info):
+        return Tag.objects.all()
 
     @login_required
-    def resolve_search_post(root, info, search=None, category=None):
+    def resolve_search_post(root, info, search=None):
         queryset = PostModel.objects.all()
 
         if search:
@@ -66,14 +72,11 @@ class Query(graphene.ObjectType):
             combined_query = Q()
             for keyword in keywords:
                 if keyword.startswith("#"):
-                    combined_query |= Q(tags__icontains=keyword)
+                    combined_query |= Q(tags__name__icontains=keyword)
                 else:
-                    combined_query |= Q(title__icontains=keyword)
+                    combined_query |= Q(title__icontains=keyword) | Q(description__icontains=keyword)
 
-        queryset = queryset.filter(combined_query)
-
-        if category:
-            queryset = queryset.filter(category=category)
+        queryset = queryset.filter(combined_query).distinct()
 
         return queryset
 
@@ -145,6 +148,37 @@ class Query(graphene.ObjectType):
         if user:
             return PostModel.objects.filter(likes=user)
         else:
+            return []
+
+    def resolve_recommended_videos(self, info, post_id):
+        try:
+            # Get the post with the given post_id
+            post = PostModel.objects.get(id=post_id)
+            user = post.user
+            first_tag = post.tags.first()
+
+            posts_by_tag = []
+            posts_by_user = []
+
+            # Get posts with the same first tag if it exists
+            if first_tag:
+                posts_by_tag = list(PostModel.objects.filter(tags=first_tag).exclude(id=post_id)[:4])
+
+            # Get posts by the same user
+            posts_by_user = list(PostModel.objects.filter(user=user).exclude(id=post_id)[:4])
+
+            # Combine the two querysets and remove duplicates
+            combined_posts = list(set(posts_by_tag) | set(posts_by_user))
+
+            # If combined posts are less than 8, add random posts
+            if len(combined_posts) < 8:
+                remaining_posts = PostModel.objects.exclude(id__in=[post.id for post in combined_posts])
+                remaining_posts_count = min(8 - len(combined_posts), remaining_posts.count())
+                combined_posts += sample(list(remaining_posts), remaining_posts_count)
+
+            return combined_posts[:8]
+
+        except PostModel.DoesNotExist:
             return []
         
         
