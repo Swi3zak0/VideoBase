@@ -60,6 +60,7 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
+  background-color: #fff !important;
 }
 .filename-form-label {
   font-size: 1.2rem;
@@ -72,4 +73,7 @@
   background-color: #f8f9fa;
   padding: 15px;
   border-radius: 5px;
+}
+.settings-form {
+  background-color: #fff !important;
 }

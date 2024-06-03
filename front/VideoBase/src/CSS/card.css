@@ -15,14 +15,12 @@
   font-size: 25px;
   font-weight: bold;
   font-family: "Arial", sans-serif;
-  padding: 15px;
   padding-left: 30px;
 }
 
 .card-title {
   font-weight: bold;
   color: #333;
-  padding: 10px 15px;
   border-bottom: 2px solid #ffd700;
   text-transform: uppercase;
   font-family: "Arial", sans-serif;
@@ -74,7 +72,7 @@
   padding: 10px;
 }
 .sticky-card {
-  margin-top: 40px;
+  margin-top: 80px;
   position: fixed;
   z-index: 1000;
   width: 15%;

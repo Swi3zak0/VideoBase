@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom"; // Dodano useNavigate
 import { useQuery, useMutation, gql } from "@apollo/client";
 import {
   Card,
@@ -22,6 +22,7 @@ import { FaTurnDown } from "react-icons/fa6";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { useTranslation } from "react-i18next";
 
+// Zapytania GraphQL
 const COMMENT_QUERY = gql`
   query MyQuery($postId: ID!) {
     postComments(postId: $postId) {
@@ -62,10 +63,15 @@ const RECOMMENDED_VIDEOS_QUERY = gql`
       user {
         username
       }
+      video {
+        id
+        url
+      }
     }
   }
 `;
 
+// Mutacje GraphQL
 const COMMENT_MUTATION = gql`
   mutation MyMutation($comment: String!, $postId: ID!) {
     createComent(comment: $comment, postId: $postId) {
@@ -120,6 +126,7 @@ const DISLIKE_POST = gql`
 
 function VideoPost() {
   const location = useLocation();
+  const navigate = useNavigate(); // Inicjalizacja useNavigate
   const videoUrl = location.state?.videoUrl;
   const videoTitle = location.state?.videoTitle;
   const username = location.state?.uploaderName;
@@ -129,6 +136,7 @@ function VideoPost() {
   const currentUserId = userId;
   const { t } = useTranslation();
 
+  // Zapytania GraphQL
   const { data, loading, refetch } = useQuery(COMMENT_QUERY, {
     variables: { postId: postId },
   });
@@ -140,6 +148,7 @@ function VideoPost() {
     }
   );
 
+  // Mutacje GraphQL
   const [createComment] = useMutation(COMMENT_MUTATION, {
     update(cache, { data: { createComent } }) {
       const existingComments = cache.readQuery({
@@ -202,7 +211,7 @@ function VideoPost() {
 
   const handleDeleteSubcomment = async (subcommentId) => {
     try {
-      console.log("Deleting subcomment with ID:", subcommentId);
+      console.log("Usuwanie subkomentarza o ID:", subcommentId);
       const { data } = await deleteSubcomment({
         variables: {
           subcommentId: subcommentId,
@@ -212,10 +221,10 @@ function VideoPost() {
       if (data.deleteSubcomment.success) {
         refetch();
       } else {
-        console.error("Error:", data.deleteSubcomment.errors);
+        console.error("Błąd:", data.deleteSubcomment.errors);
       }
     } catch (error) {
-      console.error("Error deleting subcomment:", error);
+      console.error("Błąd usuwania subkomentarza:", error);
     }
   };
 
@@ -456,6 +465,21 @@ function VideoPost() {
     refetch();
   };
 
+  const redirectToVideo = (post, event) => {
+    event.preventDefault();
+    navigate(`/video/${post.id}`, {
+      state: {
+        videoUrl: post.video.url,
+        videoTitle: post.title,
+        videoDescription: post.description,
+        likes: post.isLiked,
+        disLikes: post.isDisliked,
+        postId: post.id,
+        uploaderName: post.user ? post.user.username : t("unloggedUser"),
+      },
+    });
+  };
+
   return (
     <Container fluid>
       <Row>
@@ -573,9 +597,14 @@ function VideoPost() {
             {recommendedLoading ? (
               <CardText>{t("loadingRecommendations")}</CardText>
             ) : (
-              <div className="row">
+              <div className="recommended-videos">
                 {recommendedData?.recommendedVideos?.map((video) => (
-                  <div key={video.id} className="col-md-12 mb-3">
+                  <div
+                    key={video.id}
+                    className="recommended-video"
+                    onClick={(e) => redirectToVideo(video, e)}
+                    style={{ cursor: "pointer" }}
+                  >
                     <div className="video-thumbnail">
                       <video
                         src={video.shortUrl}
@@ -584,8 +613,12 @@ function VideoPost() {
                         style={{ width: "100%" }}
                       />
                     </div>
-                    <div className="video-title">{video.title}</div>
-                    {video.user && <div>{video.user.username}</div>}
+                    <div className="video-info">
+                      <div className="video-title">{video.title}</div>
+                      {video.user && (
+                        <div className="video-user">{video.user.username}</div>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>

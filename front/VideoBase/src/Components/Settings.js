@@ -12,9 +12,9 @@ function Settings() {
 
   return (
     <Container fluid>
-      <Row className="gx-5">
+      <Row className=" gx-5">
         <Col md={2}>
-          <Card>
+          <Card className="settings-form">
             <Card.Header>{t("myProfile")}</Card.Header>
             <div className="nav-section">
               <NavLink to="account" className="nav-link">

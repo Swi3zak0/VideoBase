@@ -71,3 +71,25 @@
   justify-content: flex-end;
   margin-bottom: 10px;
 }
+.form-select {
+  margin-top: 80px;
+  background-color: #3d3d3d;
+  color: #fff;
+  border: 2px solid gold;
+  position: fixed;
+  z-index: 1000;
+  width: 15%;
+  appearance: none;
+  padding: 10px;
+  font-size: 16px;
+  border-radius: 5px;
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 15px;
+}
+
+.form-select:focus {
+  border-color: gold;
+  box-shadow: 0 0 0 0.2rem rgba(255, 215, 0, 0.5);
+  outline: none;
+}

@@ -12,3 +12,29 @@
   display: flex;
   gap: 10px;
 }
+
+.recommended-videos {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 10px;
+}
+
+.recommended-video {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #dee2e6;
+  border-radius: 0.25rem;
+  padding: 10px;
+  background-color: #f8f9fa;
+}
+
+.video-title {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.video-user {
+  color: #6c757d;
+}

@@ -8,6 +8,7 @@ import {
   Row,
   Col,
   Card,
+  Form,
 } from "react-bootstrap";
 import { IoIosStarOutline } from "react-icons/io";
 import avatar from "../Images/avatar.jpg";
@@ -37,14 +38,16 @@ const POST_QUERY = gql`
     }
   }
 `;
-
 function Home() {
   const location = useLocation();
   const navigate = useNavigate();
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
-  const { data } = useQuery(POST_QUERY);
-  // const avatar = localStorage.getItem("avatar");
+  const [sortOrder, setSortOrder] = useState("newest");
+
+  const { data, refetch } = useQuery(POST_QUERY, {
+    variables: { sortOrder },
+  });
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
@@ -66,6 +69,11 @@ function Home() {
     }
   }, [location.search]);
 
+  const handleSortChange = (event) => {
+    setSortOrder(event.target.value);
+    refetch({ sortOrder: event.target.value });
+  };
+
   const redirectToVideo = (post, event) => {
     event.preventDefault();
     navigate(`/video/${post.id}`, {
@@ -85,51 +93,49 @@ function Home() {
 
   return (
     <Container fluid>
-      <div>
-        {successMessage && (
-          <div className="alert alert-success" role="alert">
-            {successMessage}
-          </div>
-        )}
-        {errorMessage && (
-          <div className="alert alert-danger" role="alert">
-            {errorMessage}
-          </div>
-        )}
-      </div>
       <Row>
-        <Col md={2}>
-          <div className="sticky-card">
-            <Card.Header className="card-header">
-              Popular
-              <IoIosStarOutline />
-            </Card.Header>
-            {data &&
-              data.allUsers &&
-              data.allUsers.map((user, index) => (
-                <ListGroup key={index}>
-                  <ListGroup.Item className="list-group-item">
-                    <img
-                      className="avatar"
-                      src={avatar}
-                      width="40"
-                      height="40"
-                      alt="avatar"
-                    />{" "}
-                    {user.username}
-                  </ListGroup.Item>
-                </ListGroup>
-              ))}
-          </div>
-        </Col>
-        <Col md={10}>
-          <Row>
-            {data &&
-              data.allNonPrivatePosts &&
-              data.allNonPrivatePosts
-                .slice()
-                .reverse()
-                .map((post) => (
+        <div>
+          {successMessage && (
+            <div className="alert alert-success" role="alert">
+              {successMessage}
+            </div>
+          )}
+          {errorMessage && (
+            <div className="alert alert-danger" role="alert">
+              {errorMessage}
+            </div>
+          )}
+        </div>
+        <Row>
+          <Col md={2}>
+            <div className="sticky-card">
+              <Card.Header className="card-header">
+                Popularne
+                <IoIosStarOutline />
+              </Card.Header>
+              {data &&
+                data.allUsers &&
+                data.allUsers.map((user, index) => (
+                  <ListGroup key={index}>
+                    <ListGroup.Item className="list-group-item">
+                      <img
+                        className="avatar"
+                        src={avatar}
+                        width="40"
+                        height="40"
+                        alt="avatar"
+                      />{" "}
+                      {user.username}
+                    </ListGroup.Item>
+                  </ListGroup>
+                ))}
+            </div>
+          </Col>
+          <Col md={8}>
+            <div className="row">
+              {data &&
+                data.allNonPrivatePosts &&
+                data.allNonPrivatePosts.map((post) => (
                   <Col md={6} key={post.id}>
                     <Card className="mb-4">
                       <CardHeader>
@@ -149,32 +155,26 @@ function Home() {
                             style={{ width: "100%" }}
                           />
                         </div>
-                        {/* <CardText>{post.description}</CardText> */}
                       </Card.Body>
-                      {/* <div className="d-flex justify-content-between align-items-center m-3">
-                      <div className="d-flex align-items-center">
-                        <BiSolidLike
-                          style={{ color: "green", marginRight: "5px" }}
-                        />
-                        {post.likesCount}
-                        <BiSolidDislike
-                          style={{
-                            color: "red",
-                            marginLeft: "10px",
-                            marginRight: "5px",
-                          }}
-                        />
-                        {post.dislikesCount}
-                      </div>
-                      <div className="d-flex align-items-center">
-                        <FaEye style={{ marginRight: "5px" }} /> {post.views}
-                      </div>
-                    </div> */}
                     </Card>
                   </Col>
                 ))}
-          </Row>
-        </Col>
+            </div>
+          </Col>
+          <Col md={2}>
+            <div className="filter-select">
+              <Form.Select
+                value={sortOrder}
+                onChange={handleSortChange}
+                className="form-select"
+              >
+                <option value="newest">Najnowsze</option>
+                <option value="best">Najlepsze</option>
+                <option value="worst">Najgorsze</option>
+              </Form.Select>
+            </div>
+          </Col>
+        </Row>
       </Row>
     </Container>
   );
