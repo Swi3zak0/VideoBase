@@ -42,6 +42,10 @@ class Query(graphene.ObjectType):
         PostType,
         post_id=graphene.ID(required=True)
     )
+    post_by_tag = graphene.List(
+        PostType,
+        tag=graphene.String()
+    )
     subcomments_by_comment_id = graphene.List(
         SubCommentType, comment_id=graphene.ID(required=True)
     )
@@ -77,10 +81,7 @@ class Query(graphene.ObjectType):
             keywords = search.split()
             combined_query = Q()
             for keyword in keywords:
-                if keyword.startswith("#"):
-                    combined_query |= Q(tags__name__icontains=keyword)
-                else:
-                    combined_query |= Q(title__icontains=keyword) | Q(description__icontains=keyword)
+                combined_query |= Q(title__icontains=keyword) | Q(description__icontains=keyword) | Q(tags__name__icontains=keyword)
 
         queryset = queryset.filter(combined_query).distinct()
 
@@ -180,6 +181,13 @@ class Query(graphene.ObjectType):
             return combined_posts[:8]
 
         except PostModel.DoesNotExist:
+            return []
+        
+    def resolve_post_by_tag(self, info, tag):
+        try:
+            tag = Tag.objects.get(name=tag)
+            return PostModel.objects.all().filter(tags=tag)
+        except Tag.DoesNotExist:
             return []
         
         
