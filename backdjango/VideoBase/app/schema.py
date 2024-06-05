@@ -2,7 +2,7 @@ from random import sample
 from django.forms import ValidationError
 import graphene
 import graphql_jwt
-from django.db.models import Q
+from django.db.models import Q, Count
 from graphql_jwt.shortcuts import get_token, create_refresh_token, get_refresh_token
 from .models import CustomUser, Tag, Video
 from django.http import HttpResponse
@@ -69,7 +69,9 @@ class Query(graphene.ObjectType):
         return True
     
     def resolve_all_tags(root, info):
-        return Tag.objects.all()
+        tags_with_posts = Tag.objects.annotate(num_posts=Count('posts')).filter(num_posts__gt=0)
+        return tags_with_posts
+
 
     def resolve_search_post(root, info, search=None):
         queryset = PostModel.objects.all()
@@ -137,7 +139,7 @@ class Query(graphene.ObjectType):
         except PostModel.DoesNotExist:
             return 0
         
-    @login_required    
+   
     def resolve_videos_added_by_user(self, info):
         user = jwt_get_user(info)
         if user:
@@ -146,7 +148,7 @@ class Query(graphene.ObjectType):
         else:
             return []
         
-    @login_required
+
     def resolve_liked_posts_by_user(self, info):
         user = jwt_get_user(info)
         if user:
@@ -164,7 +166,7 @@ class Query(graphene.ObjectType):
             posts_by_user = []
 
             if first_tag:
-                posts_by_tag = list(PostModel.objects.filter(tags=first_tag).exclude(id=post_id)[:4])
+                posts_by_tag = list(PostModel.objects.filter(tags=first_tag, is_private=False).exclude(id=post_id)[:4])
 
             posts_by_user = list(PostModel.objects.filter(user=user).exclude(id=post_id)[:4])
 
