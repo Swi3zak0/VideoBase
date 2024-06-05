@@ -54,11 +54,9 @@ class Query(graphene.ObjectType):
     liked_posts_by_user = graphene.List(PostType)
     recommended_videos = graphene.List(PostType, post_id=graphene.ID(required=True))
 
-    @login_required
     def resolve_all_videos(self, info):
         return VideoModel.objects.all()
     
-    @login_required
     def resolve_all_non_private_posts(self, info):
         return PostModel.objects.all().filter(is_private=False)
 
@@ -73,7 +71,6 @@ class Query(graphene.ObjectType):
     def resolve_all_tags(root, info):
         return Tag.objects.all()
 
-    @login_required
     def resolve_search_post(root, info, search=None):
         queryset = PostModel.objects.all()
 

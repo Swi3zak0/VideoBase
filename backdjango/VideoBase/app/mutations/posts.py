@@ -16,7 +16,7 @@ class CreatePostMutation(graphene.Mutation):
         description = graphene.String()
         video_url = graphene.String(required=True)
         is_private = graphene.Boolean()
-        expiration_date = graphene.Int()
+        # expiration_date = graphene.Int()
         tags = graphene.String()
 
     success = graphene.Boolean()
@@ -37,19 +37,19 @@ class CreatePostMutation(graphene.Mutation):
         try:
             user = jwt_get_user(info)
 
-            exp_date = None
-            if is_private:
-                if expiration_date:
-                    if expiration_date == 1:
-                        exp_date = timezone.now() + timezone.timedelta(days=1)
-                    elif expiration_date == 2:
-                        exp_date = timezone.now() + timezone.timedelta(days=3)
-                    elif expiration_date == 3:
-                        exp_date = timezone.now() + timezone.timedelta(days=7)
-                    else:
-                        exp_date = timezone.now() + timezone.timedelta(days=1)
-                else:
-                    exp_date = timezone.now() + timezone.timedelta(days=1)
+            # exp_date = None
+            # if is_private:
+            #     if expiration_date:
+            #         if expiration_date == 1:
+            #             exp_date = timezone.now() + timezone.timedelta(days=1)
+            #         elif expiration_date == 2:
+            #             exp_date = timezone.now() + timezone.timedelta(days=3)
+            #         elif expiration_date == 3:
+            #             exp_date = timezone.now() + timezone.timedelta(days=7)
+            #         else:
+            #             exp_date = timezone.now() + timezone.timedelta(days=1)
+            #     else:
+            #         exp_date = timezone.now() + timezone.timedelta(days=1)
 
             video = Video.objects.get(url=video_url)
 
@@ -60,7 +60,7 @@ class CreatePostMutation(graphene.Mutation):
                 user=user,
                 short_url=video_url,
                 is_private=is_private,
-                expiration_date=exp_date,
+                # expiration_date=exp_date,
             )
 
             if tags:

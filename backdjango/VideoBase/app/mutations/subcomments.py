@@ -32,6 +32,8 @@ class CreateSubCommentMutation(graphene.Mutation):
             return CreateSubCommentMutation(success=True, errors=None)
         except Exception as e:
             return CreateSubCommentMutation(success=False, errors=str(e))
+        
+
 
 
 class DeleteSubcommentMutation(graphene.Mutation):

@@ -49,7 +49,9 @@ SECRET_KEY = 'django-insecure-&7n%8**hdl$d3p*o!s95z_c!k9z$r4y&%-o%&hz4wn#k7&(yu0
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['192.168.55.104',
+                 'localhost',
+                 '127.0.0.1']
 
 
 
@@ -196,7 +198,7 @@ GRAPHQL_JWT = {
     "JWT_VERIFY_EXPIRATION": True,
     "JWT_LONG_RUNNING_REFRESH_TOKEN": True,
     "JWT_ALLOW_ARGUMENT": True,
-    "JWT_COOKIE_SECURE": True,
+    "JWT_COOKIE_SECURE": False,
     "JWT_AUTH_TOKEN_EXPIRATION_DELTA": timedelta(minutes=5),
     "JWT_REFRESH_TOKEN_EXPIRATION_DELTA": timedelta(days=7),
 }
