@@ -9,6 +9,8 @@ import {
   Col,
   Card,
   Form,
+  Navbar,
+  Nav,
 } from "react-bootstrap";
 import { IoIosStarOutline } from "react-icons/io";
 import avatar from "../Images/avatar.jpg";
@@ -33,21 +35,67 @@ const POST_QUERY = gql`
         url
       }
     }
+  }
+`;
+
+const TAGS_QUERY = gql`
+  query MyQuery {
+    allTags {
+      id
+      name
+    }
+  }
+`;
+
+const POSTS_BY_TAG_QUERY = gql`
+  query MyQuery($tag: String!) {
+    postByTag(tag: $tag) {
+      id
+      shortUrl
+      title
+      views
+      isLiked
+      isDisliked
+      dislikesCount
+      likesCount
+      description
+      user {
+        username
+      }
+      video {
+        id
+        url
+      }
+    }
+  }
+`;
+
+const USERS_QUERY = gql`
+  query MyQuery {
     allUsers {
       username
     }
   }
 `;
+
 function Home() {
   const location = useLocation();
   const navigate = useNavigate();
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [sortOrder, setSortOrder] = useState("newest");
+  const [selectedTag, setSelectedTag] = useState("");
 
-  const { data, refetch } = useQuery(POST_QUERY, {
-    variables: { sortOrder },
-  });
+  const { data: postData, refetch: refetchPosts } = useQuery(
+    selectedTag ? POSTS_BY_TAG_QUERY : POST_QUERY,
+    {
+      variables: selectedTag ? { tag: selectedTag } : {},
+    }
+  );
+
+  const { data: usersData } = useQuery(USERS_QUERY);
+
+  const { data: tagsData } = useQuery(TAGS_QUERY);
 
   useEffect(() => {
     const searchParams = new URLSearchParams(location.search);
@@ -71,7 +119,17 @@ function Home() {
 
   const handleSortChange = (event) => {
     setSortOrder(event.target.value);
-    refetch({ sortOrder: event.target.value });
+    refetchPosts(selectedTag ? { tag: selectedTag } : {});
+  };
+
+  const handleTagClick = (tagName) => {
+    if (tagName === "All") {
+      setSelectedTag("");
+      refetchPosts();
+    } else {
+      setSelectedTag(tagName);
+      refetchPosts({ tag: tagName });
+    }
   };
 
   const redirectToVideo = (post, event) => {
@@ -107,15 +165,40 @@ function Home() {
           )}
         </div>
         <Row>
+          <Navbar className="tags">
+            <Navbar.Brand className="tag-brand">Tagi</Navbar.Brand>
+            <Nav className="mr-auto">
+              <Nav.Link
+                key="all"
+                onClick={() => handleTagClick("All")}
+                className={`tag ${selectedTag === "" ? "active-tag" : ""}`}
+              >
+                All
+              </Nav.Link>
+              {tagsData &&
+                tagsData.allTags &&
+                tagsData.allTags.map((tag) => (
+                  <Nav.Link
+                    key={tag.id}
+                    onClick={() => handleTagClick(tag.name)}
+                    className={`tag ${
+                      selectedTag === tag.name ? "active-tag" : ""
+                    }`}
+                  >
+                    {tag.name}
+                  </Nav.Link>
+                ))}
+            </Nav>
+          </Navbar>
           <Col md={2}>
             <div className="sticky-card">
               <Card.Header className="card-header">
                 Popularne
                 <IoIosStarOutline />
               </Card.Header>
-              {data &&
-                data.allUsers &&
-                data.allUsers.map((user, index) => (
+              {usersData &&
+                usersData.allUsers &&
+                usersData.allUsers.map((user, index) => (
                   <ListGroup key={index}>
                     <ListGroup.Item className="list-group-item">
                       <img
@@ -130,48 +213,49 @@ function Home() {
                   </ListGroup>
                 ))}
             </div>
+            <Card className="mb-3 sort-card">
+              <Card.Header className="card-header">Sorted by:</Card.Header>
+              <Card.Body>
+                <Form.Select value={sortOrder} onChange={handleSortChange}>
+                  <option value="newest">Najnowsze</option>
+                  <option value="best">Najlepsze</option>
+                  <option value="worst">Najgorsze</option>
+                </Form.Select>
+              </Card.Body>
+            </Card>
           </Col>
-          <Col md={8}>
+          <Col md={9}>
             <div className="row">
-              {data &&
-                data.allNonPrivatePosts &&
-                data.allNonPrivatePosts.map((post) => (
-                  <Col md={6} key={post.id}>
-                    <Card className="mb-4">
-                      <CardHeader>
-                        {post.user ? post.user.username : "Nieznany użytkownik"}
-                      </CardHeader>
-                      <Card.Body
-                        className="cursor-pointer"
-                        onClick={(e) => redirectToVideo(post, e)}
-                      >
-                        <Card.Title>{post.title}</Card.Title>
-                        <div>
-                          <video
-                            className="video"
-                            src={post.shortUrl}
-                            alt="wideo"
-                            controls
-                            style={{ width: "100%" }}
-                          />
-                        </div>
-                      </Card.Body>
-                    </Card>
-                  </Col>
-                ))}
-            </div>
-          </Col>
-          <Col md={2}>
-            <div className="filter-select">
-              <Form.Select
-                value={sortOrder}
-                onChange={handleSortChange}
-                className="form-select"
-              >
-                <option value="newest">Najnowsze</option>
-                <option value="best">Najlepsze</option>
-                <option value="worst">Najgorsze</option>
-              </Form.Select>
+              {postData &&
+                (postData.allNonPrivatePosts || postData.postByTag) &&
+                (postData.allNonPrivatePosts || postData.postByTag).map(
+                  (post) => (
+                    <Col md={6} key={post.id}>
+                      <Card className="mb-4">
+                        <CardHeader>
+                          {post.user
+                            ? post.user.username
+                            : "Nieznany użytkownik"}
+                        </CardHeader>
+                        <Card.Body
+                          className="cursor-pointer"
+                          onClick={(e) => redirectToVideo(post, e)}
+                        >
+                          <Card.Title>{post.title}</Card.Title>
+                          <div>
+                            <video
+                              className="video"
+                              src={post.shortUrl}
+                              alt="wideo"
+                              controls
+                              style={{ width: "100%" }}
+                            />
+                          </div>
+                        </Card.Body>
+                      </Card>
+                    </Col>
+                  )
+                )}
             </div>
           </Col>
         </Row>

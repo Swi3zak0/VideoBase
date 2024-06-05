@@ -50,11 +50,11 @@ function AddVideo() {
       if (data.createPost.success) {
         setPostStatus("Film został dodany");
       } else {
-        setPostStatus("Błąd dodawania filmiku: " + data.createPost.errors);
+        setPostStatus("Błąd dodawania filmiku");
       }
     },
     onError: (error) => {
-      setPostStatus("Błąd dodawania filmiku: " + error.message);
+      setPostStatus("Błąd dodawania filmiku: ");
     },
   });
 
@@ -72,9 +72,16 @@ function AddVideo() {
         },
       });
     } catch (error) {
-      setPostStatus("Błąd dodawania filmiku: " + error.message);
+      setPostStatus("Błąd dodawania filmiku");
     }
   };
+  console.log({
+    title: title,
+    description: description,
+    videoUrl: videoUrl,
+    isPrivate: isPrivate,
+    tags: tags,
+  });
 
   return (
     <Container fluid>
@@ -129,7 +136,10 @@ function AddVideo() {
                 type="checkbox"
                 id="check"
                 label="Private"
-                onChange={(e) => setIsPrivate(e.target.checked)}
+                onChange={(e) => {
+                  console.log("Checkbox value: ", e.target.checked);
+                  setIsPrivate(e.target.checked);
+                }}
                 checked={isPrivate}
               />
             </Form.Group>

@@ -75,3 +75,8 @@
 .nav-link.active {
   font-weight: bold !important;
 }
+.tag-brand {
+  color: #fff;
+  font-size: 25px;
+  padding: 5px;
+}

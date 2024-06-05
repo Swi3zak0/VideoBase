@@ -467,17 +467,19 @@ function VideoPost() {
 
   const redirectToVideo = (post, event) => {
     event.preventDefault();
-    navigate(`/video/${post.id}`, {
-      state: {
-        videoUrl: post.video.url,
-        videoTitle: post.title,
-        videoDescription: post.description,
-        likes: post.isLiked,
-        disLikes: post.isDisliked,
-        postId: post.id,
-        uploaderName: post.user ? post.user.username : t("unloggedUser"),
-      },
-    });
+    if (post.video && post.video.url) {
+      navigate(`/video/${post.id}`, {
+        state: {
+          videoUrl: post.video.url,
+          videoTitle: post.title,
+          videoDescription: post.description,
+          likes: post.isLiked,
+          disLikes: post.isDisliked,
+          postId: post.id,
+          uploaderName: post.user ? post.user.username : t("unloggedUser"),
+        },
+      });
+    }
   };
 
   return (
